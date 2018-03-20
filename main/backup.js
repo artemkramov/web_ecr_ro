@@ -125,16 +125,6 @@ var BackupSubView = Backbone.View.extend({
 				'id', 'Addr', 'AdptFlg', 'DNS', 'Gate', 'Mask'
 			]
 		});
-		if (!_.isUndefined(isImport) && isImport) {
-			if (Cloud.isProductSynchronizationOn) {
-				_.each(Cloud.managedTables, function (tableName) {
-					specialSchemaItems.push({
-						id:                tableName,
-						allowedAttributes: []
-					});
-				});
-			}
-		}
 		return specialSchemaItems;
 	}
 });
@@ -403,15 +393,6 @@ var ImportView = BackupSubView.extend({
 		this.$el.empty().append(this.template({
 			importDelimiter: self.backupDelimiter
 		}));
-		if (Cloud.isProductSynchronizationOn) {
-			var alert = new Alert({
-				model: {
-					type:    'warning',
-					message: t("Device makes products synchronization with Cloud therefore PLU csv file will be ignored")
-				}
-			});
-			$(self.$el.find('#import-warning').empty().append(alert.render().$el));
-		}
 		return this;
 	},
 	/**

@@ -111,26 +111,20 @@
 <script type="text/template" id="impex-view-plu">
     <a class="btn btn-default" href="#" data-toggle="tooltip" title="<%= t('Back') %>">
         <span class="glyphicon glyphicon-arrow-left"></span></a>
-    <% if (!Cloud.isProductSynchronizationOn) { %>
+
     <div class="btn-group">
         <button class="export btn btn-default" draggable="true" data-toggle="tooltip" title="<%= t('Export') %>"><span
                     class="glyphicon glyphicon-export"></span></button>
         <button class="import btn btn-default"><span class="glyphicon glyphicon-import" data-toggle="tooltip"
                                                      title="<%= t('Import') %>"></span></button>
     </div>
-    <% } %>
+
     <div hidden><a class="csv" download="tables.csv"/>
         <input type="file" class="icsv"/></div>
 </script>
 
 <script type="text/template" id="form-template">
     <form id="<%= id %>" data-fid="<%= id %>" autocomplete="on" class="form-horizontal">
-        <% if (id == 'Cloud') { %>
-        <h4 class="cloud-subtitle">
-            <%= t("If you have already registered, please enter the data, you obtained on your account at") %>
-            <a href="https://www.pos-data.eu" target="_blank">www.pos-data.eu</a>
-        </h4>
-        <% } %>
         <% _.each( elems, function(el){
             if (('renderable' in el) && !el.renderable) return; %>
         <div class="form-group row">
@@ -281,7 +275,7 @@
 </script>
 
 <script type="text/template" id="plu-table-bar-template">
-    <% if (!Cloud.isProductSynchronizationOn) { %>
+
     <button class="btn btn-primary btn-save-table" data-toggle="tooltip" title="<%= t('Save') %>"
             data-loading-text="<%= t('Saving...') %>">
         <span class="glyphicon glyphicon-floppy-disk"></span> <%= t('Save') %>
@@ -297,7 +291,7 @@
     </div>
     <button class="btn btn-default btnfrm" data-toggle="tooltip" title="<%= t('Form Mode') %>">
         <span class="glyphicon glyphicon-th-list"></span></button>
-    <% } %>
+
     <button class="btn btn-default" data-ev="refresh" data-toggle="tooltip" title="<%= t('Refresh') %>">
         <span class="glyphicon glyphicon-refresh"></span></button>
 </script>

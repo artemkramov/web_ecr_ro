@@ -14,9 +14,7 @@ var AppRouter = Backbone.Router.extend({
 		"fm(/:page)":      'fisc',
 		"logo":            'logoScr',
 		"report":          'repScr',
-		"backup":          'backupScr',
-		"cloud":           'cloudScr',
-		"novelty":         'noveltyScr'
+		"backup":          'backupScr'
 	},
 	execute: function (callback, args) {
 		if (this.view) {
@@ -106,18 +104,6 @@ var AppRouter = Backbone.Router.extend({
 	},
 	backupScr:  function (page) {
 		this.view = new BackupScreenView();
-	},
-	cloudScr:   function (page) {
-		var cloudPages = [
-			{lnk: '#cloud/settings', name: 'Cloud settings', page: new CloudPage()}
-		];
-		this.view      = new PagesScreen({models: cloudPages, no: 0});
-	},
-	noveltyScr: function (page) {
-		var noveltyPages = [
-			{lnk: '#novelty/list', name: 'Novelties', page: new NoveltyPage()}
-		];
-		this.view        = new PagesScreen({models: noveltyPages, no: 0});
 	}
 });
 
@@ -201,13 +187,13 @@ var appStart = function () {
 		schemaLoaded.resolve();
 	});
 
-	window.eetModel  = new EETModel();
+	window.eetModel = new EETModel();
 
-	var initModel    = new InitializeDataModel();
+	var initModel = new InitializeDataModel();
 
-	$.when(qryDone, schemaLoaded, eetModel.initializeData(), initModel.initializeData(), fiscalCell.initializeData()).always(function () {
-		$.when(Cloud.checkIfSupported()).always(function () {
-			console.log(Cloud.isProductSynchronizationOn);
+	$.when(qryDone, schemaLoaded, initModel.initializeData(), fiscalCell.initializeData()).always(function () {
+		console.log(schema.get('PLU'));
+		$.when(eetModel.initializeData()).always(function () {
 			if (schema.get('PLU')) {
 				mainScreenCells.unshift(new MainCell({
 					model: new Backbone.Model(
@@ -257,7 +243,7 @@ var appStart = function () {
 			tickHandler = setInterval(_.bind(events.trigger, events, 'tick'), 1000);
 			Backbone.history.start();
 		});
-
 	});
+
 };
 

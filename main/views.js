@@ -147,10 +147,16 @@ var ConfirmModal = Modal.extend({
 	callbackConfirm: function () {
 	},
 
+	callbackCancel: function () {
+	},
+
 	autoClose: false,
 
-	setCallback:   function (callback) {
+	setCallback:   function (callback, callbackCancel) {
 		this.callbackConfirm = callback;
+		if (!_.isUndefined(callbackCancel)) {
+			this.callbackCancel = callbackCancel;
+		}
 		this.setButtons(this.buttons());
 	},
 	buttons:       function () {
@@ -172,6 +178,7 @@ var ConfirmModal = Modal.extend({
 		events.trigger('clickDlg', 'hide');
 	},
 	handleCancel:  function () {
+		this.callbackCancel();
 		this.$el.off('click', '.modal-footer button');
 		this.hide();
 	},
@@ -373,12 +380,12 @@ var MainScreenView = Backbone.View.extend({
 		}
 		if (!this.inrow) this.inrow = 2;
 		this.lang = new LanguageSelector();
-		this.notification = new NotificationHeader();
+		//this.notification = new NotificationHeader();
 	},
 	render:     function () {
 		this.$el.html('');
 		this.$el.append(this.lang.render().$el);
-		this.$el.append(this.notification.render().$el);
+		//this.$el.append(this.notification.render().$el);
 		this.$el.append(this.$summary.render().$el);
 		if (this.cells) {
 			var row = false;
@@ -748,9 +755,7 @@ var FormDisplay = Backbone.View.extend({
 			var val = obj[name];
 			//if (typeof (this.$el[0][name]) != "object") continue;
 			var el   = $('[name=' + name + ']', this.$el);
-			if (name == "PIN" && obj["id"] == "Cloud") {
-				val = leadingZero(val, 4);
-			}
+
 			var $flt = 0;
 			if (el.length == 0) continue;
 			switch (el.prop('type')) {
@@ -941,7 +946,7 @@ var TableDisplay = Backgrid.Grid.extend({
 				this.collection = args.collection;
 			}
 			window.testData = arguments;
-			if (Cloud.isProductSynchronizationOn && args.model.id == 'PLU') {
+			if (args.model.id == 'PLU') {
 				for (var i = 0; i < arguments[0].columns.length; i++) {
 					var data = _.clone(arguments[0].columns[i]);
 					data.editable = 0;
@@ -1752,9 +1757,6 @@ var PLUContainer = TableContainer.extend({
 					items: field.help,
 					label: field.label
 				});
-				if (Cloud.isProductSynchronizationOn) {
-					message = t("Device is connected to Cloud therefore you can't edit product data.");
-				}
 				var alert            = compiled({
 					type:    'info',
 					message: message

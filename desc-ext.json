@@ -172,7 +172,18 @@
       "Disconnected from cloud product sync!": "Disconnected from cloud product sync!",
       "Disconnect from cloud product sync": "Disconnect from cloud product sync",
       "Do you want to turn off product synchronization with Cloud?": "Do you want to turn off product synchronization with Cloud?",
-      "Device makes products synchronization with Cloud therefore PLU csv file will be ignored": "Device makes products synchronization with Cloud therefore PLU csv file will be ignored"
+      "Device makes products synchronization with Cloud therefore PLU csv file will be ignored": "Device makes products synchronization with Cloud therefore PLU csv file will be ignored",
+
+
+      "ANAF report": "ANAF report",
+      "Generate and export ANAF XML files from the given range": "Generate and export ANAF XML files from the given range",
+      "Generate": "Generate",
+      "Enter Z-report range manually": "Enter Z-report range manually",
+      "Start number": "Start number",
+      "End number": "End number",
+      "End number must be bigger than start": "End number must be bigger than start",
+      "Z-report with such number does not exist": "Z-report with such number does not exist",
+      "Error while processing Z-report with number %d": "Error while processing Z-report with number %d"
     }
   }
 }

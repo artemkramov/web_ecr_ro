@@ -499,25 +499,13 @@ var CertificateBlock = Backbone.View.extend({
 		var self         = this;
 		var messageKey   = "public";
 		var wrapperBlock = self.$el.find('.cert-upload.public');
-		self.uploadFileToServer("", self.urlSslCertificate, bytes).done(function (response) {
-			$(wrapperBlock).removeClass("active");
-			$("#btn-certificate-server-upload").removeClass('active');
-			if (parseInt(response.verify)) {
-				self.dataModel.set("isSslVerified", true);
-				self.render();
-				self.pushMessage(t("Certificate was imported successfully"), "success", "private");
-				return deferred.resolve();
-			}
-			else {
-				self.pushMessage(t("Certificate wasn't imported"), "danger", messageKey);
-				return deferred.reject();
-			}
-		}).fail(function () {
-			self.pushMessage(t("Uncaught error"), "danger", messageKey);
-			$("#btn-certificate-server-upload").removeClass('active');
-			$(wrapperBlock).removeClass("active");
-			return deferred.reject();
-		});
+
+		$(wrapperBlock).removeClass("active");
+		$("#btn-certificate-server-upload").removeClass('active');
+		self.dataModel.set("isSslVerified", true);
+		self.render();
+		self.pushMessage(t("Certificate was imported successfully"), "success", "private");
+		deferred.resolve();
 		return deferred.promise();
 	},
 	/**
@@ -699,10 +687,9 @@ var CertificateBlock = Backbone.View.extend({
 			});
 			if (isCleared) {
 				self.dataModel.set("isP12Verified", false);
-				self.onRemoveSSLClick("#btn-ssl-certificate-remove").then(function () {
-					self.render();
-					self.pushMessage(t("Certificate was cleared successfully"), "success", "private");
-				});
+				self.render();
+				self.pushMessage(t("Certificate was cleared successfully"), "success", "private");
+
 
 			}
 		}).fail(function () {
@@ -750,36 +737,37 @@ var CertificateBlock = Backbone.View.extend({
 	 */
 	onUploadSslServer:    function (event) {
 		var deferred               = $.Deferred();
-		var self                   = this;
-		var filePath               = 'http://help-micro.com.ua/certificates/ssl_cert.crt?_=' + (new Date()).getTime().toString();
-		var request                = new XMLHttpRequest();
-		request.open("GET", filePath, true);
-		request.responseType       = "arraybuffer";
-		request.send();
-		$(event.target).addClass('active');
-		request.onreadystatechange = function () {
-			if (request.readyState == 4) {
-				if (request.status == 200) {
-					var arrayBuffer = request.response;
-					if (arrayBuffer) {
-						var byteArray = new Uint8Array(arrayBuffer);
-						self.uploadSslFile(byteArray).then(function () {
-							return deferred.resolve();
-						}).fail(function () {
-							return deferred.reject();
-						});
-					}
-					else {
-						$(event.target).removeClass('active');
-					}
-				}
-				else {
-					self.pushMessage(t("Connection failed"), "danger", "public");
-					$(event.target).removeClass('active');
-					return deferred.reject();
-				}
-			}
-		};
+		deferred.resolve();
+		//var self                   = this;
+		//var filePath               = 'http://help-micro.com.ua/certificates/ssl_cert.crt?_=' + (new Date()).getTime().toString();
+		//var request                = new XMLHttpRequest();
+		//request.open("GET", filePath, true);
+		//request.responseType       = "arraybuffer";
+		//request.send();
+		//$(event.target).addClass('active');
+		//request.onreadystatechange = function () {
+		//	if (request.readyState == 4) {
+		//		if (request.status == 200) {
+		//			var arrayBuffer = request.response;
+		//			if (arrayBuffer) {
+		//				var byteArray = new Uint8Array(arrayBuffer);
+		//				self.uploadSslFile(byteArray).then(function () {
+		//					return deferred.resolve();
+		//				}).fail(function () {
+		//					return deferred.reject();
+		//				});
+		//			}
+		//			else {
+		//				$(event.target).removeClass('active');
+		//			}
+		//		}
+		//		else {
+		//			self.pushMessage(t("Connection failed"), "danger", "public");
+		//			$(event.target).removeClass('active');
+		//			return deferred.reject();
+		//		}
+		//	}
+		//};
 		return deferred.promise();
 	}
 });
@@ -833,12 +821,12 @@ var EETModel = Backbone.Model.extend({
 					self.set('isP12Verified', false);
 				}
 			});
-			self.isCertificateVerified(self.get('urlSsl')).done(function (response) {
-				if (parseInt(response['verify']) == 0) {
-					self.set('isSslVerified', false);
-				}
-				return deferred.resolve();
-			});
+			//self.isCertificateVerified(self.get('urlSsl')).done(function (response) {
+			//	if (parseInt(response['verify']) == 0) {
+			//		self.set('isSslVerified', false);
+			//	}
+			return deferred.resolve();
+			//});
 		}).fail(function () {
 			return deferred.reject();
 		});
@@ -968,29 +956,82 @@ var FiscReset = TimeForm.extend({
 //</editor-fold>
 
 var ReportPage = Backbone.View.extend({
-	tagName:  'div',
-	events:   {
-		'click #xr': 'xrep',
-		'click #zr': 'zrep',
-		'click #pN': 'prnNum',
-		'click #pD': 'prnDate'
+	tagName: 'div',
+
+	/**
+	 * Url to find info about the last exported Z-report
+	 */
+	urlANAF: '/cgi/tbl/ANAF',
+
+	/**
+	 * Url to generate A4200 XML
+	 */
+	urlA4200: '/cgi/anaf/a4200',
+
+	/**
+	 * Url to generate A4203 XML
+	 */
+	urlA4203: '/cgi/anaf/a4203',
+
+	/**
+	 * Field name which describes the last exported Z-report
+	 */
+	fieldANAFLastZ: 'SendZ',
+
+	/**
+	 * Events
+	 */
+	events: {
+		'click #xr':                         'xrep',
+		'click #zr':                         'zrep',
+		'click #pN':                         'prnNum',
+		'click #pD':                         'prnDate',
+		'change #checkbox-enter-range':      'onCheckboxChange',
+		'submit #form-generate-anaf-report': 'onFormSubmit'
 	},
+
+	/**
+	 * HTML template
+	 */
 	template: _.template($('#reports-tmpl').html()),
-	render:   function () {
-		this.$el.html(this.template());
+
+	/**
+	 * Current data which represents last exported Z-report and last printed Z-report
+	 */
+	currentData: {},
+
+	/**
+	 * Generate button
+	 */
+	button: $('.btn-generate-report'),
+
+	/**
+	 * Render function
+	 * @returns {ReportPage}
+	 */
+	render:             function () {
+		var self = this;
+
+		/**
+		 * Init current data
+		 */
+		this.initData().always(function (response) {
+			self.currentData = response;
+			self.$el.html(self.template(response));
+		});
 		return this;
 	},
-	xrep:     function (e) {
+	xrep:               function (e) {
 		e.preventDefault();
 		callProc({addr: '/cgi/proc/printreport', btn: e.target}, 10);
 		return false;
 	},
-	zrep:     function (e) {
+	zrep:               function (e) {
 		e.preventDefault();
 		callProc({addr: '/cgi/proc/printreport', btn: e.target}, 0);
 		return false;
 	},
-	prnNum:   function (e) {
+	prnNum:             function (e) {
 		e.preventDefault();
 		callProc({
 			addr: '/cgi/proc/printfmreport',
@@ -998,13 +1039,347 @@ var ReportPage = Backbone.View.extend({
 		}, $('#isShort').prop('checked') ? 4 : 2, '2015-01-01', '2015-01-01', $('#fromN').val(), $('#toN').val());
 		return false;
 	},
-	prnDate:  function (e) {
+	prnDate:            function (e) {
 		e.preventDefault();
 		callProc({
 			addr: '/cgi/proc/printfmreport',
 			btn:  e.target
 		}, $('#isShort').prop('checked') ? 3 : 1, toStringDate(getDate('fromD'), 'y-m-d'), toStringDate(getDate('toD'), 'y-m-d'), 1, 1);
 		return false;
+	},
+	/**
+	 * Initialize data about last printed and last exported Z-report
+	 * @returns {*}
+	 */
+	initData:           function () {
+		var self     = this;
+		var deferred = $.Deferred();
+		var response = {
+			lastExportedZ: '',
+			lastZ:         ''
+		};
+
+		/**
+		 * Fetch info about the last printed Z-report
+		 */
+		$.ajax({
+			url:      '/cgi/state',
+			type:     'GET',
+			dataType: 'json',
+			success:  function (state) {
+				response.lastZ = state['currZ'];
+
+				/**
+				 * Fetch info about the last exported Z-report
+				 */
+				$.ajax({
+					url:      self.urlANAF,
+					type:     'GET',
+					dataType: 'json',
+					success:  function (data) {
+						response.lastExportedZ = data[self.fieldANAFLastZ];
+						console.log(data, data[self.fieldANAFLastZ], self.fieldANAFLastZ);
+						return deferred.resolve(response);
+					},
+					error:    function () {
+						return deferred.reject(response);
+					}
+				});
+			},
+			error:    function () {
+				return deferred.reject(response);
+			}
+		});
+		return deferred.promise();
+	},
+	/**
+	 * On checkbox change event
+	 * @param e
+	 */
+	onCheckboxChange:   function (e) {
+		var checkbox = $(e.target);
+
+		/**
+		 * If checkbox is checked than allow user to write range directly
+		 */
+		if (!$(checkbox).is(':checked')) {
+			$('.form-report-range').attr('readonly', true);
+			$('#start').val(this.currentData['lastExportedZ']);
+			$('#end').val(this.currentData['lastZ']);
+		}
+		else {
+			$('.form-report-range').removeAttr('readonly');
+		}
+	},
+	/**
+	 * On form submit
+	 * @param e
+	 * @returns {boolean}
+	 */
+	onFormSubmit:       function (e) {
+		var self = this;
+		var form = $(e.target);
+
+		/**
+		 * Start Z-report number
+		 * @type {Number}
+		 */
+		var start = parseInt($(form).find('#start').val());
+
+		/**
+		 * End Z-report number
+		 * @type {Number}
+		 */
+		var end = parseInt($(form).find('#end').val());
+
+		/**
+		 * If the user has checked to input range manually
+		 * @type {*|jQuery}
+		 */
+		var isRangeEnteredManually = $(form).find('#checkbox-enter-range').is(':checked');
+
+		/**
+		 * Clear all messages
+		 * and check for some custom validation rules
+		 */
+		this.clearMessageBlock();
+		if (start > end) {
+			this.onErrorEvent(t('End number must be bigger than start'));
+			return false;
+		}
+		if (end > this.currentData['lastZ']) {
+			this.onErrorEvent(t('Z-report with such number does not exist'));
+			return false;
+		}
+
+		/**
+		 * If the range was entered manually and the end number isn't exported yet
+		 * then suggest to update last exported Z-number
+		 */
+		if (isRangeEnteredManually) {
+			if (end >= this.currentData['lastExportedZ']) {
+
+				/**
+				 * Show confirm modal
+				 * @type {ConfirmModal}
+				 */
+				var confirmModal       = new ConfirmModal();
+				confirmModal.set({
+					header: t('Warning'),
+					body:   t('Do you want to rewrite the last exported Z-report value?')
+				});
+				confirmModal.autoClose = true;
+
+				/**
+				 * Set callbacks for both 'Yes' and 'No' options
+				 */
+				confirmModal.setCallback(function () {
+					self.processReport(start, end, true);
+				}, function () {
+					self.processReport(start, end, false);
+				});
+				confirmModal.show();
+			}
+			else {
+				self.processReport(start, end, false);
+			}
+		}
+		else {
+			this.processReport(start, end, true);
+		}
+		return false;
+	},
+	/**
+	 * Process report from the given range
+	 * @param start
+	 * @param end
+	 * @param isNecessaryToUpdate
+	 */
+	processReport:      function (start, end, isNecessaryToUpdate) {
+		var files = [];
+		var self  = this;
+		$('body').addClass('preloading');
+		$(this.button).button('loading');
+
+		/**
+		 * Fetch A4200 XML file
+		 */
+		$.ajax({
+			url:     self.urlA4200,
+			type:    'GET',
+			data:    {
+				from: start,
+				to:   end
+			},
+			success: function (response) {
+				/**
+				 * Push A4200 file
+				 */
+				files.push({
+					name:    'a4200_' + start + '_' + end,
+					content: xmlToString(response)
+				});
+
+				/**
+				 * Process all A4203 files from given range
+				 */
+				self.processA4203(start, end, function (filesA4203) {
+
+					/**
+					 * Merge A4200 with A4203
+					 */
+					files = $.merge(files, filesA4203);
+
+					/**
+					 * If all files were generated successfully
+					 */
+					if (files.length == 2 + end - start) {
+
+						/**
+						 * If it is necessary to update the last exported Z-report
+						 * than update it
+						 * Else just simply generate ZIP-archive
+						 */
+						if (isNecessaryToUpdate) {
+							var data                  = {};
+							data[self.fieldANAFLastZ] = end;
+							$.ajax({
+								url:     self.urlANAF,
+								type:    'POST',
+								data:    JSON.stringify(data),
+								headers: {
+									'X-HTTP-Method-Override': 'PATCH'
+								},
+								success: function () {
+									/**
+									 * Generate ZIP-archive
+									 */
+									self.currentData['lastExportedZ'] = end;
+									self.generateZIPArchive(files, start, end);
+								},
+								error:   function () {
+									self.onErrorEvent(t('Connection failed'));
+								}
+							});
+						}
+						else {
+							self.generateZIPArchive(files, start, end);
+						}
+					}
+				});
+			},
+			error:   function () {
+				self.onErrorEvent(t('Connection failed'));
+			}
+		})
+	},
+	/**
+	 * Generate A4203 files in recursive way
+	 * @param currentZ
+	 * @param end
+	 * @param callback
+	 * @param files
+	 */
+	processA4203:       function (currentZ, end, callback, files) {
+		var self = this;
+
+		/**
+		 * Create files array
+		 */
+		if (_.isUndefined(files)) {
+			files = [];
+		}
+
+		/**
+		 * Fetch A4203 file by the given Z-report number
+		 */
+		$.ajax({
+			url:     self.urlA4203,
+			type:    'GET',
+			data:    {
+				z: currentZ
+			},
+			success: function (response) {
+
+				/**
+				 * Push response to file array
+				 */
+				files.push({
+					name:    'a4203_' + currentZ,
+					content: xmlToString(response)
+				});
+
+				/**
+				 * If current Z-report number is less than last
+				 * than continue
+				 * Else run callback function
+				 */
+				if (currentZ < end) {
+					self.processA4203(currentZ + 1, end, callback, files);
+				}
+				else {
+					callback(files);
+				}
+			},
+			error:   function () {
+				self.onErrorEvent(sprintf(t('Error while processing Z-report with number %d'), currentZ));
+			}
+		})
+	},
+	/**
+	 * Generate ZIP-archive from the files
+	 * @param files
+	 * @param start
+	 * @param end
+	 */
+	generateZIPArchive: function (files, start, end) {
+		console.log('generate ZIP archive');
+		$('body').removeClass('preloading');
+		var zip = new JSZip();
+		_.each(files, function (file) {
+			console.log('file', file);
+			zip.file(file.name + '.xml', file.content);
+		});
+		zip.generateAsync({type: "blob"}).then(function (content) {
+			saveAs(content, t('Export') + '_' + start + '_' + end + '.zip');
+		});
+	},
+	/**
+	 * Show alert info message
+	 * @param message
+	 */
+	onInfoEvent:        function (message) {
+		this.pushMessage(message, "info");
+	},
+	/**
+	 * Show alert error message
+	 * @param message
+	 */
+	onErrorEvent:       function (message) {
+		this.pushMessage(message, "danger");
+	},
+	/**
+	 * Push alert message
+	 * @param message
+	 * @param type
+	 */
+	pushMessage:        function (message, type) {
+		var alert = new Alert({
+			model: {
+				type:    type,
+				message: message
+			}
+		});
+		this.clearMessageBlock().append(alert.render().$el);
+	},
+	/**
+	 * Clear error block
+	 * @returns {*}
+	 */
+	clearMessageBlock:  function () {
+		$(this.button).button('reset');
+		$('body').removeClass('preloading');
+		return this.$el.find(".error-block").empty();
 	}
 });
 

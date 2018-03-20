@@ -373,3 +373,16 @@ body.preloading .preloader, body.uploading .file-loader {
     margin-bottom: 20px;
     text-align: center;
 }
+
+.form-group-range-item {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+.form-group-range-item .form-control {
+    max-width: 100px;
+}
+
+.form-group-range-item:first-child {
+    margin-left: 0px;
+}

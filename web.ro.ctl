@@ -176,20 +176,9 @@ Name=js/backup.js
 File=main/backup.js;
 Content-Type=application/javascript
 
-Name=js/novelty.js
-File=main/novelty.js;
-Content-Type=application/javascript
-Cache-Control=max-age=0, no-cache, no-store, must-revalidate
-Pragma=no-cache
-Expires=Wed, 11 Jan 1984 05:00:00 GMT
-
 #Name=firmware.upgrade.js
 #File=main/firmware.upgrade.js;
 #Content-Type=application/javascript
-
-Name=js/cloud.js
-File=main/cloud.js;
-Content-Type=application/javascript
 
 Name=js/bootstrap-datetimepicker.min.js
 File=js/bootstrap-datetimepicker.min.js
