@@ -543,3 +543,14 @@ var NetworkInfo = Backbone.Collection.extend({
 	}
 });
 
+/**
+ * Model which contains settings for fiscal memory data in device
+ */
+var FiscalBackupModel = Backbone.Model.extend({
+	'url': 'http://192.168.0.104:8080/cgi/fiscal_data',
+	defaults: {
+		'pageSize': '',
+		'pageNumber': 0,
+		'url': ''
+	}
+});

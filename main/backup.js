@@ -835,3 +835,285 @@ var ImportViewList = Backbone.View.extend({
 	}
 });
 
+/**
+ * The layout view for the backup page
+ */
+var FiscalBackup = Backbone.View.extend({
+	template:          _.template($("#fiscal-backup-block").html()),
+	events:            {
+		"click #btn-run-fiscal-export": "onExportClick",
+		"change #file-fiscal-backup":   "onFileChange",
+		"click #file-fiscal-backup":    "onFileClick",
+		"click #btn-fiscal-upload":     "onImportClick"
+	},
+
+	/**
+	 * Export alias to show messages
+	 */
+	exportBlock:       "export",
+
+	/**
+	 * Import alias to show messages
+	 */
+	importBlock:       "import",
+
+	/**
+	 * Pages collection to bind the whole export file
+	 */
+	exportPages:       [],
+
+	/**
+	 * Byte array to make import
+	 */
+	importData:        [],
+
+	/**
+	 * Render view
+	 * @returns {FiscalBackup}
+	 */
+	render:            function () {
+		var self = this;
+		this.delegateEvents();
+		this.$el.empty();
+
+		/**
+		 * Fetch settings from the device
+		 * and than render view
+		 */
+		this.model.fetch().done(function () {
+			self.$el.append(self.template(self.model.toJSON()));
+		}).fail(function () {
+			alert('Cannot fetch data from ' + self.model.url);
+		});
+		return this;
+	},
+	/**
+	 * On export button click
+	 * @param e
+	 */
+	onExportClick:     function (e) {
+		var self         = this;
+		this.exportPages = [];
+		var button       = $(e.target);
+		$(button).button('loading');
+
+		/**
+		 * Read the total number of pages
+		 * @type {Number}
+		 */
+		var pageNumber   = parseInt(this.model.get('pageNumber'));
+		var deferred     = $.Deferred();
+
+		/**
+		 * Get all pages in range [1:pageNumber]
+		 */
+		this.getMemoryPage(pageNumber, deferred).done(function () {
+			$(button).button('reset');
+
+			/**
+			 * Prepare blob and save it
+			 */
+			var blob = new Blob(self.exportPages, {type: "application/octet-stream"});
+			saveAs(blob, t("Export data.bin"));
+		}).fail(function (message) {
+			$(button).button('reset');
+			self.onErrorEvent(message, self.exportBlock);
+		});
+	},
+	/**
+	 * Get memory page by the given page number
+	 * @param end
+	 * @param deferred
+	 * @param currentNumber
+	 * @returns {*}
+	 */
+	getMemoryPage:     function (end, deferred, currentNumber) {
+		var self = this;
+		if (_.isUndefined(currentNumber)) {
+			currentNumber = 1;
+		}
+		/**
+		 * Make XMLHttpRequest
+		 * Set response type as arraybuffer
+		 * @type {XMLHttpRequest}
+		 */
+		var oReq          = new XMLHttpRequest();
+		oReq.open("GET", self.model.get('url') + '?page=' + currentNumber.toString(), true);
+		oReq.responseType = "arraybuffer";
+
+		oReq.onload = function (oEvent) {
+
+			var arrayBuffer = oReq.response;
+
+			/**
+			 * Convert response to byte array
+			 * @type {Uint8Array}
+			 */
+			var byteArray = new Uint8Array(arrayBuffer);
+
+			/**
+			 * Get raw response text
+			 * @type {string}
+			 */
+			var rawText = String.fromCharCode.apply(null, new Uint16Array(byteArray));
+
+			/**
+			 * Try to parse response
+			 * If it is a JSON than show error message
+			 * Else add the page to exportPages collection and go on or finish export procees
+			 */
+			try {
+				var jsonData = $.parseJSON(rawText);
+				return deferred.reject(schema.error(jsonData['err']) + ' - ' + currentNumber.toString());
+			}
+			catch (error) {
+				self.exportPages.push(byteArray);
+				if (currentNumber >= end) {
+					return deferred.resolve();
+				}
+				else {
+					return self.getMemoryPage(end, deferred, ++currentNumber);
+				}
+			}
+
+
+		};
+
+		oReq.onerror = function () {
+			return deferred.reject(sprintf(t("Error while retrieving page %s"), currentNumber));
+		};
+		oReq.send();
+		return deferred.promise();
+	},
+	/**
+	 * Clear the current input value on the click
+	 * @param e
+	 */
+	onFileClick:       function (e) {
+		this.importData = [];
+		e.target.value  = "";
+	},
+	/**
+	 * Event on the file change
+	 * @param e
+	 */
+	onFileChange:      function (e) {
+		var self = this;
+		var file = e.target.files[0];
+		if (!file) {
+			return;
+		}
+		/**
+		 * Read file as byte array using onload event
+		 */
+		var reader    = new FileReader();
+		reader.onload = function (e) {
+			var contents = e.target.result;
+			self.importData = new Uint8Array(contents);
+		};
+		reader.readAsArrayBuffer(file);
+	},
+	/**
+	 * On import button click
+	 * @param e
+	 */
+	onImportClick:     function (e) {
+		var self   = this;
+		var button = $(e.target);
+
+		/**
+		 * Check if the user has chosen the file to import
+		 */
+		if (_.isEmpty(this.importData)) {
+			self.onErrorEvent(t("Choose the file to import"), self.importBlock);
+		}
+		else {
+			$(button).button('loading');
+
+			/**
+			 * Send binary data to device
+			 */
+			self.sendBinaryData().done(function (response) {
+				$(button).button('reset');
+
+				/**
+				 * Check if error exists in JSON response
+				 */
+				if (!_.isUndefined(response['err'])) {
+					self.onErrorEvent(schema.error(response['err']), self.importBlock);
+				}
+				else {
+					self.onInfoEvent(t("Import was made successfully"), self.importBlock);
+				}
+			}).fail(function (message) {
+				$(button).button('reset');
+				self.onErrorEvent(message, self.importBlock);
+			});
+		}
+
+	},
+	/**
+	 * Send array of bytes to the endpoint
+	 * @returns {*}
+	 */
+	sendBinaryData:    function () {
+		var self     = this;
+		var deferred = $.Deferred();
+		$.ajax({
+			url:         self.model.get('url'),
+			type:        'post',
+			data:        self.importData,
+			dataType:    'json',
+			processData: false,
+			contentType: 'application/octet-stream',
+			success:     function (response) {
+				return deferred.resolve(response);
+			},
+			error:       function () {
+				return deferred.reject(t("Connection failed"));
+			}
+		});
+		return deferred.promise();
+	},
+	/**
+	 * Show alert info message
+	 * @param message
+	 * @param block
+	 */
+	onInfoEvent:       function (message, block) {
+		this.pushMessage(message, block, "info");
+	},
+	/**
+	 * Show alert error message
+	 * @param message
+	 * @param block
+	 */
+	onErrorEvent:      function (message, block) {
+		this.pushMessage(message, block, "danger");
+	},
+	/**
+	 * Push alert message
+	 * @param message
+	 * @param block
+	 * @param type
+	 */
+	pushMessage:       function (message, block, type) {
+		var alert = new Alert({
+			model: {
+				type:    type,
+				message: message
+			}
+		});
+		this.clearMessageBlock(block).append(alert.render().$el);
+	},
+	/**
+	 * Clear error block
+	 * @param block
+	 * @returns {*}
+	 */
+	clearMessageBlock: function (block) {
+		var errorBlock = '#error-block-' + block;
+		return this.$el.find(errorBlock).empty();
+	}
+});
+

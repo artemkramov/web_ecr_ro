@@ -14,7 +14,8 @@ var AppRouter = Backbone.Router.extend({
 		"fm(/:page)":      'fisc',
 		"logo":            'logoScr',
 		"report":          'repScr',
-		"backup":          'backupScr'
+		"backup":          'backupScr',
+		"fiscal":          'backupFiscalScr'
 	},
 	execute: function (callback, args) {
 		if (this.view) {
@@ -104,6 +105,12 @@ var AppRouter = Backbone.Router.extend({
 	},
 	backupScr:  function (page) {
 		this.view = new BackupScreenView();
+	},
+	backupFiscalScr:  function (page) {
+		var model = new FiscalBackupModel();
+		this.view = new FiscalBackup({
+			model: model
+		});
 	}
 });
 

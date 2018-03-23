@@ -183,7 +183,10 @@
       "End number": "End number",
       "End number must be bigger than start": "End number must be bigger than start",
       "Z-report with such number does not exist": "Z-report with such number does not exist",
-      "Error while processing Z-report with number %d": "Error while processing Z-report with number %d"
+      "Error while processing Z-report with number %d": "Error while processing Z-report with number %d",
+      "Error while retrieving page %s": "Error while retrieving page %s",
+      "Export data.bin": "Export data.bin",
+      "Import was made successfully": "Import was made successfully"
     }
   }
 }
