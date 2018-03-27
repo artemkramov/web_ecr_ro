@@ -898,16 +898,9 @@ var FiscalBackup = Backbone.View.extend({
 		$(button).button('loading');
 
 		/**
-		 * Read the total number of pages
-		 * @type {Number}
-		 */
-		var pageNumber   = parseInt(this.model.get('pageNumber'));
-		var deferred     = $.Deferred();
-
-		/**
 		 * Get all pages in range [1:pageNumber]
 		 */
-		this.getMemoryPage(pageNumber, deferred).done(function () {
+		this.getMemoryPage().done(function () {
 			$(button).button('reset');
 
 			/**
@@ -922,23 +915,18 @@ var FiscalBackup = Backbone.View.extend({
 	},
 	/**
 	 * Get memory page by the given page number
-	 * @param end
-	 * @param deferred
-	 * @param currentNumber
 	 * @returns {*}
 	 */
-	getMemoryPage:     function (end, deferred, currentNumber) {
+	getMemoryPage:     function () {
 		var self = this;
-		if (_.isUndefined(currentNumber)) {
-			currentNumber = 1;
-		}
+		var deferred = $.Deferred();
 		/**
 		 * Make XMLHttpRequest
 		 * Set response type as arraybuffer
 		 * @type {XMLHttpRequest}
 		 */
 		var oReq          = new XMLHttpRequest();
-		oReq.open("GET", self.model.get('url') + '?page=' + currentNumber.toString(), true);
+		oReq.open("GET", self.model.get('url'), true);
 		oReq.responseType = "arraybuffer";
 
 		oReq.onload = function (oEvent) {
@@ -968,12 +956,7 @@ var FiscalBackup = Backbone.View.extend({
 			}
 			catch (error) {
 				self.exportPages.push(byteArray);
-				if (currentNumber >= end) {
-					return deferred.resolve();
-				}
-				else {
-					return self.getMemoryPage(end, deferred, ++currentNumber);
-				}
+				return deferred.resolve();
 			}
 
 
@@ -1028,26 +1011,39 @@ var FiscalBackup = Backbone.View.extend({
 			self.onErrorEvent(t("Choose the file to import"), self.importBlock);
 		}
 		else {
-			$(button).button('loading');
 
 			/**
-			 * Send binary data to device
+			 * Update model info about jumpers
 			 */
-			self.sendBinaryData().done(function (response) {
-				$(button).button('reset');
+			self.model.fetch().done(function () {
+				if (parseInt(self.model.get('sa1')) == parseInt(self.model.get('sa2')) && parseInt(self.model.get('sa2')) == 1) {
+					$(button).button('loading');
 
-				/**
-				 * Check if error exists in JSON response
-				 */
-				if (!_.isUndefined(response['err'])) {
-					self.onErrorEvent(schema.error(response['err']), self.importBlock);
+					/**
+					 * Send binary data to device
+					 */
+					self.sendBinaryData().done(function (response) {
+						$(button).button('reset');
+
+						/**
+						 * Check if error exists in JSON response
+						 */
+						if (!_.isUndefined(response['err'])) {
+							self.onErrorEvent(schema.error(response['err']), self.importBlock);
+						}
+						else {
+							self.onInfoEvent(t("Import was made successfully"), self.importBlock);
+						}
+					}).fail(function (message) {
+						$(button).button('reset');
+						self.onErrorEvent(message, self.importBlock);
+					});
 				}
 				else {
-					self.onInfoEvent(t("Import was made successfully"), self.importBlock);
+					self.onErrorEvent(t("Please check your jumpers (must be both set)"), self.importBlock);
 				}
-			}).fail(function (message) {
-				$(button).button('reset');
-				self.onErrorEvent(message, self.importBlock);
+			}).fail(function () {
+				self.onErrorEvent('Cannot fetch data from ' + self.model.url);
 			});
 		}
 

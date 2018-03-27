@@ -186,7 +186,8 @@
       "Error while processing Z-report with number %d": "Error while processing Z-report with number %d",
       "Error while retrieving page %s": "Error while retrieving page %s",
       "Export data.bin": "Export data.bin",
-      "Import was made successfully": "Import was made successfully"
+      "Import was made successfully": "Import was made successfully",
+      "Please check your jumpers (must be both set)": "Please check your jumpers (must be both set)"
     }
   }
 }
