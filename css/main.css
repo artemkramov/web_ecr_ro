@@ -386,3 +386,7 @@ body.preloading .preloader, body.uploading .file-loader {
 .form-group-range-item:first-child {
     margin-left: 0px;
 }
+
+.panel-anaf {
+    margin-top: 15px;
+}

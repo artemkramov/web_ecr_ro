@@ -547,10 +547,13 @@ var NetworkInfo = Backbone.Collection.extend({
  * Model which contains settings for fiscal memory data in device
  */
 var FiscalBackupModel = Backbone.Model.extend({
-	'url': '/cgi/fismem',
+	'url': '/cgi/fmem',
 	defaults: {
 		'size': '',
 		'sa1': 0,
-		'sa2': 0
+		'sa2': 0,
+		'url': '',
+		'url_int': '',
+		'fm_blank': -1
 	}
 });

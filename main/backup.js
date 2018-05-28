@@ -839,8 +839,8 @@ var ImportViewList = Backbone.View.extend({
  * The layout view for the backup page
  */
 var FiscalBackup = Backbone.View.extend({
-	template:          _.template($("#fiscal-backup-block").html()),
-	events:            {
+	template: _.template($("#fiscal-backup-block").html()),
+	events:   {
 		"click #btn-run-fiscal-export": "onExportClick",
 		"change #file-fiscal-backup":   "onFileChange",
 		"click #file-fiscal-backup":    "onFileClick",
@@ -850,22 +850,22 @@ var FiscalBackup = Backbone.View.extend({
 	/**
 	 * Export alias to show messages
 	 */
-	exportBlock:       "export",
+	exportBlock: "export",
 
 	/**
 	 * Import alias to show messages
 	 */
-	importBlock:       "import",
+	importBlock: "import",
 
 	/**
 	 * Pages collection to bind the whole export file
 	 */
-	exportPages:       [],
+	exportPages: [],
 
 	/**
 	 * Byte array to make import
 	 */
-	importData:        [],
+	importData: [],
 
 	/**
 	 * Render view
@@ -918,16 +918,17 @@ var FiscalBackup = Backbone.View.extend({
 	 * @returns {*}
 	 */
 	getMemoryPage:     function () {
-		var self = this;
-		var deferred = $.Deferred();
+		var self             = this;
+		var deferred         = $.Deferred();
+		var isInternalMemory = this.$el.find('#backup-internal-memory-export').is(':checked');
 		/**
 		 * Make XMLHttpRequest
 		 * Set response type as arraybuffer
 		 * @type {XMLHttpRequest}
 		 */
-		var oReq          = new XMLHttpRequest();
-		oReq.open("GET", self.model.get('url'), true);
-		oReq.responseType = "arraybuffer";
+		var oReq             = new XMLHttpRequest();
+		oReq.open("GET", isInternalMemory ? self.model.get('url_int') : self.model.get('url'), true);
+		oReq.responseType    = "arraybuffer";
 
 		oReq.onload = function (oEvent) {
 
@@ -939,25 +940,8 @@ var FiscalBackup = Backbone.View.extend({
 			 */
 			var byteArray = new Uint8Array(arrayBuffer);
 
-			/**
-			 * Get raw response text
-			 * @type {string}
-			 */
-			var rawText = String.fromCharCode.apply(null, new Uint16Array(byteArray));
-
-			/**
-			 * Try to parse response
-			 * If it is a JSON than show error message
-			 * Else add the page to exportPages collection and go on or finish export procees
-			 */
-			try {
-				var jsonData = $.parseJSON(rawText);
-				return deferred.reject(schema.error(jsonData['err']) + ' - ' + currentNumber.toString());
-			}
-			catch (error) {
-				self.exportPages.push(byteArray);
-				return deferred.resolve();
-			}
+			self.exportPages.push(byteArray);
+			return deferred.resolve();
 
 
 		};
@@ -991,7 +975,7 @@ var FiscalBackup = Backbone.View.extend({
 		 */
 		var reader    = new FileReader();
 		reader.onload = function (e) {
-			var contents = e.target.result;
+			var contents    = e.target.result;
 			self.importData = new Uint8Array(contents);
 		};
 		reader.readAsArrayBuffer(file);
@@ -1016,28 +1000,34 @@ var FiscalBackup = Backbone.View.extend({
 			 * Update model info about jumpers
 			 */
 			self.model.fetch().done(function () {
+				var isInternalMemory = self.$el.find('#backup-internal-memory-import').is(':checked');
 				if (parseInt(self.model.get('sa1')) == parseInt(self.model.get('sa2')) && parseInt(self.model.get('sa2')) == 1) {
-					$(button).button('loading');
-
-					/**
-					 * Send binary data to device
-					 */
-					self.sendBinaryData().done(function (response) {
-						$(button).button('reset');
+					//if (self.model.get('fm_blank') !== 0 && !isInternalMemory) {
+					//	self.onErrorEvent(t('Fiscal memory isn\'t empty'), self.importBlock);
+					//}
+					//else {
+						$(button).button('loading');
 
 						/**
-						 * Check if error exists in JSON response
+						 * Send binary data to device
 						 */
-						if (!_.isUndefined(response['err'])) {
-							self.onErrorEvent(schema.error(response['err']), self.importBlock);
-						}
-						else {
-							self.onInfoEvent(t("Import was made successfully"), self.importBlock);
-						}
-					}).fail(function (message) {
-						$(button).button('reset');
-						self.onErrorEvent(message, self.importBlock);
-					});
+						self.sendBinaryData(isInternalMemory).done(function (response) {
+							$(button).button('reset');
+
+							/**
+							 * Check if error exists in JSON response
+							 */
+							if (!_.isUndefined(response['err'])) {
+								self.onErrorEvent(schema.error(response['err']), self.importBlock);
+							}
+							else {
+								self.onInfoEvent(t("Import was made successfully"), self.importBlock);
+							}
+						}).fail(function (message) {
+							$(button).button('reset');
+							self.onErrorEvent(message, self.importBlock);
+						});
+					//}
 				}
 				else {
 					self.onErrorEvent(t("Please check your jumpers (must be both set)"), self.importBlock);
@@ -1050,13 +1040,14 @@ var FiscalBackup = Backbone.View.extend({
 	},
 	/**
 	 * Send array of bytes to the endpoint
+	 * @param isInternalMemory
 	 * @returns {*}
 	 */
-	sendBinaryData:    function () {
+	sendBinaryData:    function (isInternalMemory) {
 		var self     = this;
 		var deferred = $.Deferred();
 		$.ajax({
-			url:         self.model.get('url'),
+			url:         isInternalMemory ? self.model.get('url_int') : self.model.get('url'),
 			type:        'post',
 			data:        self.importData,
 			dataType:    'json',

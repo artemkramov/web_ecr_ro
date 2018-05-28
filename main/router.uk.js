@@ -94,11 +94,14 @@ var AppRouter = Backbone.Router.extend({
 			case "fisc":
 				this.fiscTab = 0;
 				break;
-			case "time":
+			case "report":
 				this.fiscTab = 1;
 				break;
-			case "reset":
+			case "time":
 				this.fiscTab = 2;
+				break;
+			case "reset":
+				this.fiscTab = 3;
 				break;
 		}
 		this.view = new PagesScreen({no: this.fiscTab, models: fiscalPages});
@@ -222,6 +225,7 @@ var appStart = function () {
 
 			fiscalPages  = [
 				{lnk: '#fm/fisc', name: 'Fiscalization', page: new FiscDo()},
+				{lnk: '#fm/report', name: 'Reports', page: new ReportANAFPage()},
 				{lnk: '#fm/time', name: 'Time', page: new FiscTime()},
 			];
 			var models   = schema.tableGroup('net');

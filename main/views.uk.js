@@ -543,6 +543,9 @@ var CertificateBlock = Backbone.View.extend({
 			else {
 				self.pushMessage(t("Certificate wasn't imported"), "danger", "private");
 			}
+		}, function () {
+			$(wrapperBlock).removeClass("active");
+			self.pushMessage(t("Certificate wasn't imported"), "danger", "private");
 		});
 	},
 	/**
@@ -628,13 +631,15 @@ var CertificateBlock = Backbone.View.extend({
 		if (_.isUndefined(binaryData)) {
 			binaryData = this.encodeStringToBinary(forge.pki.pemToDer(pemString).data);
 		}
+		//window.p12 = this.p12;
+		//window.binaryData = binaryData;
 		return $.ajax({
 			url:         url,
 			data:        binaryData,
 			type:        'post',
 			processData: false,
 			contentType: 'application/octet-stream',
-			timeout:     3000
+			timeout:     10000
 		});
 	},
 	/**
@@ -680,20 +685,19 @@ var CertificateBlock = Backbone.View.extend({
 		$.when.apply($, promises).done(function (responseCertificate, responsePrivateKey) {
 			var isCleared = true;
 			$(event.target).removeClass('active');
-			_.each(arguments, function (response) {
-				if (_.isObject(response[0]) && parseInt(response[0]['verify']) == 1) {
-					isCleared = false;
-				}
-			});
+			//_.each(arguments, function (response) {
+			//	if (_.isObject(response[0]) && parseInt(response[0]['verify']) == 1) {
+			//		isCleared = false;
+			//	}
+			//});
 			if (isCleared) {
 				self.dataModel.set("isP12Verified", false);
 				self.render();
 				self.pushMessage(t("Certificate was cleared successfully"), "success", "private");
-
-
 			}
 		}).fail(function () {
 			$(event.target).removeClass('active');
+			self.pushMessage(t("Certificate was not cleared successfully"), "danger", "private");
 		});
 	},
 	/**
@@ -724,11 +728,11 @@ var CertificateBlock = Backbone.View.extend({
 	clearCertificate:     function (url) {
 		return $.ajax({
 			url:         url,
-			data:        [1, 1, 1],
+			data:        "123",
 			type:        'post',
 			processData: false,
 			contentType: 'application/octet-stream',
-			timeout:     3000
+			timeout:     10000
 		});
 	},
 	/**
@@ -736,7 +740,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * @param event
 	 */
 	onUploadSslServer:    function (event) {
-		var deferred               = $.Deferred();
+		var deferred = $.Deferred();
 		deferred.resolve();
 		//var self                   = this;
 		//var filePath               = 'http://help-micro.com.ua/certificates/ssl_cert.crt?_=' + (new Date()).getTime().toString();
@@ -955,8 +959,7 @@ var FiscReset = TimeForm.extend({
 });
 //</editor-fold>
 
-var ReportPage = Backbone.View.extend({
-	tagName: 'div',
+var ReportANAFPage = PageView.extend({
 
 	/**
 	 * Url to find info about the last exported Z-report
@@ -982,10 +985,6 @@ var ReportPage = Backbone.View.extend({
 	 * Events
 	 */
 	events: {
-		'click #xr':                         'xrep',
-		'click #zr':                         'zrep',
-		'click #pN':                         'prnNum',
-		'click #pD':                         'prnDate',
 		'change #checkbox-enter-range':      'onCheckboxChange',
 		'submit #form-generate-anaf-report': 'onFormSubmit'
 	},
@@ -993,7 +992,7 @@ var ReportPage = Backbone.View.extend({
 	/**
 	 * HTML template
 	 */
-	template: _.template($('#reports-tmpl').html()),
+	template: _.template($('#reports-anaf-tmpl').html()),
 
 	/**
 	 * Current data which represents last exported Z-report and last printed Z-report
@@ -1007,46 +1006,22 @@ var ReportPage = Backbone.View.extend({
 
 	/**
 	 * Render function
-	 * @returns {ReportPage}
+	 * @returns {ReportANAFPage}
 	 */
 	render:             function () {
 		var self = this;
+		this.delegateEvents();
 
 		/**
-		 * Init current data
-		 */
+		* Init current data
+		*/
 		this.initData().always(function (response) {
 			self.currentData = response;
 			self.$el.html(self.template(response));
 		});
 		return this;
 	},
-	xrep:               function (e) {
-		e.preventDefault();
-		callProc({addr: '/cgi/proc/printreport', btn: e.target}, 10);
-		return false;
-	},
-	zrep:               function (e) {
-		e.preventDefault();
-		callProc({addr: '/cgi/proc/printreport', btn: e.target}, 0);
-		return false;
-	},
-	prnNum:             function (e) {
-		e.preventDefault();
-		callProc({
-			addr: '/cgi/proc/printfmreport',
-			btn:  e.target
-		}, $('#isShort').prop('checked') ? 4 : 2, '2015-01-01', '2015-01-01', $('#fromN').val(), $('#toN').val());
-		return false;
-	},
-	prnDate:            function (e) {
-		e.preventDefault();
-		callProc({
-			addr: '/cgi/proc/printfmreport',
-			btn:  e.target
-		}, $('#isShort').prop('checked') ? 3 : 1, toStringDate(getDate('fromD'), 'y-m-d'), toStringDate(getDate('toD'), 'y-m-d'), 1, 1);
-		return false;
-	},
+
 	/**
 	 * Initialize data about last printed and last exported Z-report
 	 * @returns {*}
@@ -1078,6 +1053,9 @@ var ReportPage = Backbone.View.extend({
 					dataType: 'json',
 					success:  function (data) {
 						response.lastExportedZ = data[self.fieldANAFLastZ];
+						if (response.lastExportedZ < response.lastZ) {
+							response.lastExportedZ++;
+						}
 						console.log(data, data[self.fieldANAFLastZ], self.fieldANAFLastZ);
 						return deferred.resolve(response);
 					},
@@ -1219,7 +1197,7 @@ var ReportPage = Backbone.View.extend({
 					name:    'a4200_' + start + '_' + end,
 					content: xmlToString(response)
 				});
-
+				console.log('after first push');
 				/**
 				 * Process all A4203 files from given range
 				 */
@@ -1256,6 +1234,14 @@ var ReportPage = Backbone.View.extend({
 									 */
 									self.currentData['lastExportedZ'] = end;
 									self.generateZIPArchive(files, start, end);
+
+									/**
+									 * Update range if the range wasn't entered manually
+									 */
+									var isManual = $("#form-generate-anaf-report").find('#checkbox-enter-range').is(':checked');
+									if (!isManual) {
+										$('#start').val(self.currentData['lastExportedZ']);
+									}
 								},
 								error:   function () {
 									self.onErrorEvent(t('Connection failed'));
@@ -1380,6 +1366,61 @@ var ReportPage = Backbone.View.extend({
 		$(this.button).button('reset');
 		$('body').removeClass('preloading');
 		return this.$el.find(".error-block").empty();
+	}
+});
+
+var ReportPage = Backbone.View.extend({
+	tagName: 'div',
+
+	/**
+	 * Events
+	 */
+	events: {
+		'click #xr':                         'xrep',
+		'click #zr':                         'zrep',
+		'click #pN':                         'prnNum',
+		'click #pD':                         'prnDate'
+	},
+
+	/**
+	 * HTML template
+	 */
+	template: _.template($('#reports-tmpl').html()),
+
+	/**
+	 * Render function
+	 * @returns {ReportPage}
+	 */
+	render:             function () {
+		var self = this;
+		self.$el.html(self.template());
+		return this;
+	},
+	xrep:               function (e) {
+		e.preventDefault();
+		callProc({addr: '/cgi/proc/printreport', btn: e.target}, 10);
+		return false;
+	},
+	zrep:               function (e) {
+		e.preventDefault();
+		callProc({addr: '/cgi/proc/printreport', btn: e.target}, 0);
+		return false;
+	},
+	prnNum:             function (e) {
+		e.preventDefault();
+		callProc({
+			addr: '/cgi/proc/printfmreport',
+			btn:  e.target
+		}, $('#isShort').prop('checked') ? 4 : 2, '2015-01-01', '2015-01-01', $('#fromN').val(), $('#toN').val());
+		return false;
+	},
+	prnDate:            function (e) {
+		e.preventDefault();
+		callProc({
+			addr: '/cgi/proc/printfmreport',
+			btn:  e.target
+		}, $('#isShort').prop('checked') ? 3 : 1, toStringDate(getDate('fromD'), 'y-m-d'), toStringDate(getDate('toD'), 'y-m-d'), 1, 1);
+		return false;
 	}
 });
 
