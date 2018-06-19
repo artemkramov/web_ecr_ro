@@ -390,3 +390,7 @@ body.preloading .preloader, body.uploading .file-loader {
 .panel-anaf {
     margin-top: 15px;
 }
+
+.csr-generation {
+    margin-top: 20px;
+}

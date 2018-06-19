@@ -425,6 +425,7 @@
                   data-original-title="<%= t('Certificate is verified') %>"></span>
             <% } %>
         </div>
+
         <input type="file" name="file" id="file-certificate"/>
         <button type="button" class="btn btn-primary" id="btn-certificate-upload">
             <span class="glyphicon glyphicon-upload upload"></span>
@@ -436,6 +437,12 @@
             <span class="glyphicon glyphicon-refresh spin refresh-remove"></span>
             <%= t("Remove") %>
         </button>
+        <div class="csr-generation">
+            <label><%= t("CSR generation") %></label>
+            <div>
+                <button class="btn btn-primary" id="btn-generate-csr"><%= t("Generate") %></button>
+            </div>
+        </div>
         <div class="message"></div>
     </div>
     <div class="cert-upload public <% if (model.get('isP12Verified') && !model.get('isSslVerified'))  print('visible'); %>">
@@ -466,6 +473,8 @@
         </button>
         <div class="message"></div>
     </div>
+
+
 </script>
 
 <script type="text/template" id="fiscal-backup-block">

@@ -21,21 +21,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="backup.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/main/backup.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="1021" column="29" selection-start-line="1021" selection-start-column="29" selection-end-line="1021" selection-end-column="29" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="tmpl.ejs" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/tmpl.ejs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-1.4909091">
-              <caret line="341" column="43" selection-start-line="341" selection-start-column="33" selection-end-line="341" selection-end-column="43" />
+            <state vertical-scroll-proportion="-4.890909">
+              <caret line="444" column="14" selection-start-line="444" selection-start-column="14" selection-end-line="444" selection-end-column="14" />
               <folding />
             </state>
           </provider>
@@ -44,8 +34,8 @@
       <file leaf-file-name="tmpl.uk.ejs" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/tmpl.uk.ejs">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-2.6181817">
-              <caret line="94" column="36" selection-start-line="94" selection-start-column="36" selection-end-line="94" selection-end-column="46" />
+            <state vertical-scroll-proportion="-1.3076923">
+              <caret line="96" column="17" selection-start-line="96" selection-start-column="17" selection-end-line="96" selection-end-column="17" />
               <folding />
             </state>
           </provider>
@@ -55,7 +45,7 @@
         <entry file="file://$PROJECT_DIR$/css/main.css">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="390" column="21" selection-start-line="390" selection-start-column="21" selection-end-line="390" selection-end-column="21" />
+              <caret line="394" column="21" selection-start-line="394" selection-start-column="21" selection-end-line="394" selection-end-column="21" />
               <folding />
             </state>
           </provider>
@@ -65,7 +55,7 @@
         <entry file="file://$PROJECT_DIR$/desc-ext.json">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="-16.461538">
-              <caret line="189" column="99" selection-start-line="189" selection-start-column="99" selection-end-line="189" selection-end-column="99" />
+              <caret line="190" column="41" selection-start-line="190" selection-start-column="41" selection-end-line="190" selection-end-column="41" />
               <folding />
             </state>
           </provider>
@@ -75,7 +65,7 @@
         <entry file="file://$PROJECT_DIR$/main/router.uk.js">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="227" column="71" selection-start-line="227" selection-start-column="71" selection-end-line="227" selection-end-column="71" />
+              <caret line="226" column="70" selection-start-line="226" selection-start-column="70" selection-end-line="226" selection-end-column="70" />
               <folding />
             </state>
           </provider>
@@ -84,8 +74,28 @@
       <file leaf-file-name="views.uk.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main/views.uk.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.39100346">
-              <caret line="1012" column="30" selection-start-line="1012" selection-start-column="30" selection-end-line="1012" selection-end-column="30" />
+            <state vertical-scroll-proportion="-1.4563427">
+              <caret line="691" column="30" selection-start-line="691" selection-start-column="30" selection-end-line="691" selection-end-column="30" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="util.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/main/util.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="390" column="1" selection-start-line="378" selection-start-column="0" selection-end-line="390" selection-end-column="1" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="models.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/main/models.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="548" column="4" selection-start-line="548" selection-start-column="4" selection-end-line="548" selection-end-column="4" />
               <folding />
             </state>
           </provider>
@@ -96,26 +106,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="465" column="5" selection-start-line="465" selection-start-column="5" selection-end-line="465" selection-end-column="5" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="proc.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/permanent_data/proc.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="37" column="9" selection-start-line="31" selection-start-column="8" selection-end-line="37" selection-end-column="9" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="util.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/main/util.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="373" column="69" selection-start-line="373" selection-start-column="8" selection-end-line="373" selection-end-column="69" />
               <folding />
             </state>
           </provider>
@@ -135,16 +125,16 @@
         <option value="$PROJECT_DIR$/permanent_data/dwl-test.html" />
         <option value="$PROJECT_DIR$/permanent_data/archived/dwl.htm" />
         <option value="$PROJECT_DIR$/permanent_data/archived/Firmware.js" />
-        <option value="$PROJECT_DIR$/main/util.js" />
-        <option value="$PROJECT_DIR$/desc-ext.json" />
         <option value="$PROJECT_DIR$/main/views.js" />
         <option value="$PROJECT_DIR$/main/models.js" />
         <option value="$PROJECT_DIR$/main/backup.js" />
-        <option value="$PROJECT_DIR$/templates/tmpl.ejs" />
         <option value="$PROJECT_DIR$/main/router.uk.js" />
         <option value="$PROJECT_DIR$/templates/tmpl.uk.ejs" />
         <option value="$PROJECT_DIR$/css/main.css" />
+        <option value="$PROJECT_DIR$/main/util.js" />
+        <option value="$PROJECT_DIR$/desc-ext.json" />
         <option value="$PROJECT_DIR$/main/views.uk.js" />
+        <option value="$PROJECT_DIR$/templates/tmpl.ejs" />
       </list>
     </option>
   </component>
@@ -186,6 +176,7 @@
       <sortByType />
     </navigator>
     <panes>
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -214,7 +205,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="templates" />
+              <option name="myItemId" value="main" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -234,7 +225,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
       <pane id="Scope" />
     </panes>
   </component>
@@ -356,13 +346,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/main/backup.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="268" column="44" selection-start-line="268" selection-start-column="44" selection-end-line="268" selection-end-column="44" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/main/exim.dbg.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -587,13 +570,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main/schema.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="557" column="1" selection-start-line="557" selection-start-column="1" selection-end-line="557" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/main/exim.dbg.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -636,14 +612,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/main/util.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="373" column="69" selection-start-line="373" selection-start-column="8" selection-end-line="373" selection-end-column="69" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/permanent_data/proc.html">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -662,16 +630,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main/models.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.16474465">
-          <caret line="81" column="4" selection-start-line="81" selection-start-column="4" selection-end-line="81" selection-end-column="4" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="548" column="4" selection-start-line="548" selection-start-column="4" selection-end-line="548" selection-end-column="4" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/desc-ext.json">
+    <entry file="file://$PROJECT_DIR$/main/schema.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-16.461538">
-          <caret line="189" column="99" selection-start-line="189" selection-start-column="99" selection-end-line="189" selection-end-column="99" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="557" column="1" selection-start-line="557" selection-start-column="1" selection-end-line="557" selection-end-column="1" />
           <folding />
         </state>
       </provider>
@@ -684,18 +652,34 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/main/util.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="390" column="1" selection-start-line="378" selection-start-column="0" selection-end-line="390" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/forge.min.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.34827587">
+          <caret line="5" column="31065" selection-start-line="5" selection-start-column="31065" selection-end-line="5" selection-end-column="31065" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/templates/tmpl.ejs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-1.4909091">
-          <caret line="341" column="43" selection-start-line="341" selection-start-column="33" selection-end-line="341" selection-end-column="43" />
+        <state vertical-scroll-proportion="-4.890909">
+          <caret line="444" column="14" selection-start-line="444" selection-start-column="14" selection-end-line="444" selection-end-column="14" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/tmpl.uk.ejs">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-2.6181817">
-          <caret line="94" column="36" selection-start-line="94" selection-start-column="36" selection-end-line="94" selection-end-column="46" />
+        <state vertical-scroll-proportion="-1.3076923">
+          <caret line="96" column="17" selection-start-line="96" selection-start-column="17" selection-end-line="96" selection-end-column="17" />
           <folding />
         </state>
       </provider>
@@ -703,7 +687,15 @@
     <entry file="file://$PROJECT_DIR$/css/main.css">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="390" column="21" selection-start-line="390" selection-start-column="21" selection-end-line="390" selection-end-column="21" />
+          <caret line="394" column="21" selection-start-line="394" selection-start-column="21" selection-end-line="394" selection-end-column="21" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/desc-ext.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-16.461538">
+          <caret line="190" column="41" selection-start-line="190" selection-start-column="41" selection-end-line="190" selection-end-column="41" />
           <folding />
         </state>
       </provider>
@@ -711,15 +703,15 @@
     <entry file="file://$PROJECT_DIR$/main/router.uk.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="227" column="71" selection-start-line="227" selection-start-column="71" selection-end-line="227" selection-end-column="71" />
+          <caret line="226" column="70" selection-start-line="226" selection-start-column="70" selection-end-line="226" selection-end-column="70" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main/views.uk.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.39100346">
-          <caret line="1012" column="30" selection-start-line="1012" selection-start-column="30" selection-end-line="1012" selection-end-column="30" />
+        <state vertical-scroll-proportion="-1.4563427">
+          <caret line="691" column="30" selection-start-line="691" selection-start-column="30" selection-end-line="691" selection-end-column="30" />
           <folding />
         </state>
       </provider>

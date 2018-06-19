@@ -404,6 +404,11 @@ var CertificateBlock = Backbone.View.extend({
 	p12: {},
 
 	/**
+	 * Object for the p7b decoding
+	 */
+	p7: {},
+
+	/**
 	 * Model with the related data about certificates
 	 */
 	dataModel: undefined,
@@ -418,7 +423,8 @@ var CertificateBlock = Backbone.View.extend({
 		"click #btn-ssl-certificate-upload":    "onUploadSslClick",
 		"click #btn-p12-certificate-remove":    "onRemoveP12Click",
 		"click #btn-ssl-certificate-remove":    "onRemoveSSLClick",
-		"click #btn-certificate-server-upload": "onUploadSslServer"
+		"click #btn-certificate-server-upload": "onUploadSslServer",
+		"click #btn-generate-csr":              "onGenerateCSRClick"
 	},
 	/**
 	 * Render html for the block
@@ -427,6 +433,7 @@ var CertificateBlock = Backbone.View.extend({
 	render:               function () {
 		var self = this;
 		this.p12 = "";
+		this.p7  = "";
 		this.delegateEvents();
 		this.$el.html(this.template({
 			model: self.dataModel
@@ -446,28 +453,45 @@ var CertificateBlock = Backbone.View.extend({
 	 * @param e
 	 */
 	onFileChange:         function (e) {
-		var self = this;
-		var file = e.target.files[0];
-		self.p12 = {};
+		var self      = this;
+		var file      = e.target.files[0];
+		self.p12      = {};
+		self.p7       = {};
 		self.disableUpload();
 		if (!file) {
 			return;
 		}
+
 		var reader    = new FileReader();
 		reader.onload = function (e) {
 			var contents = e.target.result;
-			/**
-			 * Try to parse the p12 file
-			 */
-			try {
-				var p12Asn1  = forge.asn1.fromDer(contents);
-				var password = prompt(t("Enter your password", ""));
-				self.p12     = forge.pkcs12.pkcs12FromAsn1(p12Asn1, password);
-				self.enableUpload();
+
+			if (file.name.indexOf(".p7b") == -1) {
+
+				/**
+				 * Try to parse the p12 file
+				 */
+				try {
+					var p12Asn1  = forge.asn1.fromDer(contents);
+					var password = prompt(t("Enter your password", ""));
+					self.p12     = forge.pkcs12.pkcs12FromAsn1(p12Asn1, password);
+					self.enableUpload();
+				}
+				catch (exception) {
+					self.pushMessage(t("Incorrect file format or password"), "danger", "private");
+				}
 			}
-			catch (exception) {
-				self.pushMessage(t("Incorrect file format or password"), "danger", "private");
+			else {
+
+				try {
+					self.p7 = forge.pkcs7.messageFromPem(contents);
+					self.enableUpload();
+				}
+				catch (exception) {
+					self.pushMessage(t("Incorrect p7b file format"), "danger", "private");
+				}
 			}
+
 		};
 		reader.readAsBinaryString(file);
 	},
@@ -513,7 +537,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * @param e
 	 */
 	onUploadClick:        function (e) {
-		if (_.isEmpty(this.p12)) {
+		if (_.isEmpty(this.p12) && _.isEmpty(this.p7)) {
 			this.pushMessage(t("Incorrect file format"), "danger", "private");
 			return;
 		}
@@ -521,6 +545,7 @@ var CertificateBlock = Backbone.View.extend({
 
 		var wrapperBlock = this.$el.find('.cert-upload.private');
 		$(wrapperBlock).addClass("active");
+
 		/**
 		 * Form the promises (queue of the data send to the server)
 		 * and wait until the finish
@@ -553,10 +578,15 @@ var CertificateBlock = Backbone.View.extend({
 	 * @returns {*[]}
 	 */
 	getPromisesForUpload: function () {
-		var privateKey  = this.getPrivateKey();
-		var certificate = this.getCertificate();
-		return [this.uploadFileToServer(forge.pki.privateKeyToPem(privateKey), this.urlPrivateKey),
-			this.uploadFileToServer(forge.pki.certificateToPem(certificate), this.urlCertificate)];
+		if (!_.isEmpty(this.p12)) {
+			var privateKey  = this.getPrivateKey();
+			var certificate = this.getCertificate();
+			return [this.uploadFileToServer(forge.pki.privateKeyToPem(privateKey), this.urlPrivateKey),
+				this.uploadFileToServer(forge.pki.certificateToPem(certificate), this.urlCertificate)];
+		}
+		else {
+			return [this.uploadFileToServer(forge.pki.certificateToPem(this.p7.certificates[0]), this.urlCertificate)];
+		}
 	},
 	/**
 	 * Check if the server response was success
@@ -565,16 +595,25 @@ var CertificateBlock = Backbone.View.extend({
 	 */
 	isResponseSuccess:    function (responseArray) {
 		var isSuccess = true;
+		var self = this;
+		if (responseArray.length == 2 && _.isString(responseArray[1])) {
+			return this.isResponseSuccessForRequest(responseArray);
+		}
 		responseArray.forEach(function (response) {
-			var flag = false;
-			if (_.isArray(response) && response[1] == "success" && parseInt(response[0].verify)) {
-				flag = true;
-			}
+			var flag = self.isResponseSuccessForRequest(response);
 			if (!flag) {
 				isSuccess = false;
 			}
 		});
 		return isSuccess;
+	},
+	/**
+	 * @param response
+	 * @returns {boolean}
+	 */
+	isResponseSuccessForRequest:    function (response) {
+		return !!(_.isArray(response) && response[1] == "success" && parseInt(response[0].verify));
+
 	},
 	/**
 	 * Enable the file upload
@@ -605,7 +644,6 @@ var CertificateBlock = Backbone.View.extend({
 	getCertificate:       function () {
 		var bags    = this.p12.getBags({bagType: forge.pki.oids.certBag});
 		var cert    = bags[forge.pki.oids.certBag][0];
-		console.dir(bags[forge.pki.oids.certBag]);
 		window.cert = cert;
 		return cert.cert;
 	},
@@ -772,6 +810,103 @@ var CertificateBlock = Backbone.View.extend({
 		//		}
 		//	}
 		//};
+		return deferred.promise();
+	},
+	/**
+	 * Generate CSR
+	 * @param e
+	 */
+	onGenerateCSRClick:   function (e) {
+		var button = $(e.target);
+		var self   = this;
+		$(button).button('loading');
+		this.getSerialNumber().done(function (serialNumber) {
+			self.generateCSRAndKeys(serialNumber).done(function (csr) {
+				var pem = forge.pki.certificationRequestToPem(csr);
+				downloadString(pem, 'text/plain', 'CSR.csr');
+				$(button).button('reset');
+			}).fail(function () {
+				self.pushMessage(t("Private key wasn't generated"), "danger", "private");
+				$(button).button('reset');
+			});
+
+
+		}).fail(function () {
+			$(button).button('reset');
+			self.pushMessage(t("Cannot read serial number of the device"), "danger", "private");
+		});
+	},
+	/**
+	 * Generate pair of keys and create CSR
+	 * @param serialNumber
+	 * @returns {*}
+	 */
+	generateCSRAndKeys:   function (serialNumber) {
+		var deferred = $.Deferred();
+		var self     = this;
+
+		// generate a key pair
+		var keys = forge.pki.rsa.generateKeyPair(2048);
+
+		// create a certification request (CSR)
+		var csr       = forge.pki.createCertificationRequest();
+		csr.publicKey = keys.publicKey;
+		csr.setSubject([{
+			name:  'commonName',
+			value: serialNumber
+		}, {
+			name:  'countryName',
+			value: 'UA'
+		}, {
+			shortName: 'ST',
+			value:     'Kyiv'
+		}, {
+			name:  'localityName',
+			value: 'Kyiv'
+		}, {
+			name:  'organizationName',
+			value: 'Help Micro Ltd'
+		}, {
+			shortName: 'OU',
+			value:     'Help Micro'
+		}]);
+
+		// sign certification request
+		csr.sign(keys.privateKey);
+
+		$.when.apply($, [this.uploadFileToServer(forge.pki.privateKeyToPem(keys.privateKey), this.urlPrivateKey)]).then(function (responseKey) {
+			if (parseInt(responseKey.verify)) {
+				return deferred.resolve(csr);
+			}
+			else {
+				return deferred.reject();
+			}
+		});
+
+		return deferred.promise();
+	},
+	/**
+	 * Get serial number of the device
+	 * @returns {*}
+	 */
+	getSerialNumber:      function () {
+		var deferred = $.Deferred();
+		$.ajax({
+			url:      '/cgi/state',
+			type:     'get',
+			dataType: 'json',
+			success:  function (data) {
+
+				/**
+				 * Remove extra symbols
+				 */
+				var serialNumber = data.serial.toString().substring(3);
+				return deferred.resolve(serialNumber);
+			},
+			error:    function () {
+				return deferred.reject();
+			}
+		});
 		return deferred.promise();
 	}
 });
@@ -1008,13 +1143,13 @@ var ReportANAFPage = PageView.extend({
 	 * Render function
 	 * @returns {ReportANAFPage}
 	 */
-	render:             function () {
+	render: function () {
 		var self = this;
 		this.delegateEvents();
 
 		/**
-		* Init current data
-		*/
+		 * Init current data
+		 */
 		this.initData().always(function (response) {
 			self.currentData = response;
 			self.$el.html(self.template(response));
@@ -1376,10 +1511,10 @@ var ReportPage = Backbone.View.extend({
 	 * Events
 	 */
 	events: {
-		'click #xr':                         'xrep',
-		'click #zr':                         'zrep',
-		'click #pN':                         'prnNum',
-		'click #pD':                         'prnDate'
+		'click #xr': 'xrep',
+		'click #zr': 'zrep',
+		'click #pN': 'prnNum',
+		'click #pD': 'prnDate'
 	},
 
 	/**
@@ -1391,22 +1526,22 @@ var ReportPage = Backbone.View.extend({
 	 * Render function
 	 * @returns {ReportPage}
 	 */
-	render:             function () {
+	render:  function () {
 		var self = this;
 		self.$el.html(self.template());
 		return this;
 	},
-	xrep:               function (e) {
+	xrep:    function (e) {
 		e.preventDefault();
 		callProc({addr: '/cgi/proc/printreport', btn: e.target}, 10);
 		return false;
 	},
-	zrep:               function (e) {
+	zrep:    function (e) {
 		e.preventDefault();
 		callProc({addr: '/cgi/proc/printreport', btn: e.target}, 0);
 		return false;
 	},
-	prnNum:             function (e) {
+	prnNum:  function (e) {
 		e.preventDefault();
 		callProc({
 			addr: '/cgi/proc/printfmreport',
@@ -1414,7 +1549,7 @@ var ReportPage = Backbone.View.extend({
 		}, $('#isShort').prop('checked') ? 4 : 2, '2015-01-01', '2015-01-01', $('#fromN').val(), $('#toN').val());
 		return false;
 	},
-	prnDate:            function (e) {
+	prnDate: function (e) {
 		e.preventDefault();
 		callProc({
 			addr: '/cgi/proc/printfmreport',

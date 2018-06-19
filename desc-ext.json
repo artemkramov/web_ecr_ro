@@ -187,7 +187,11 @@
       "Error while retrieving page %s": "Error while retrieving page %s",
       "Export data.bin": "Export data.bin",
       "Import was made successfully": "Import was made successfully",
-      "Please check your jumpers (must be both set)": "Please check your jumpers (must be both set)"
+      "Please check your jumpers (must be both set)": "Please check your jumpers (must be both set)",
+      "CSR generation": "CSR generation",
+      "Cannot read serial number of the device": "Cannot read serial number of the device",
+      "Private key wasn't generated": "Private key wasn't generated",
+      "Incorrect p7b file format": "Incorrect p7b file format"
     }
   }
 }
