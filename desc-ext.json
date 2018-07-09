@@ -191,7 +191,8 @@
       "CSR generation": "CSR generation",
       "Cannot read serial number of the device": "Cannot read serial number of the device",
       "Private key wasn't generated": "Private key wasn't generated",
-      "Incorrect p7b file format": "Incorrect p7b file format"
+      "Incorrect p7b file format": "Incorrect p7b file format",
+      "Error while processing a4200 file": "Error while processing a4200 file"
     }
   }
 }

@@ -413,9 +413,9 @@ var CertificateBlock = Backbone.View.extend({
 	 */
 	dataModel: undefined,
 
-	btnUpload:            "#btn-certificate-upload",
-	template:             _.template($("#cert-upload-block").html()),
-	events:               {
+	btnUpload:                   "#btn-certificate-upload",
+	template:                    _.template($("#cert-upload-block").html()),
+	events:                      {
 		"change #file-certificate":             "onFileChange",
 		"click #file-certificate":              "onFileClick",
 		"click #ssl-file-certificate":          "onFileClick",
@@ -430,7 +430,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * Render html for the block
 	 * @returns {CertificateBlock}
 	 */
-	render:               function () {
+	render:                      function () {
 		var self = this;
 		this.p12 = "";
 		this.p7  = "";
@@ -445,18 +445,18 @@ var CertificateBlock = Backbone.View.extend({
 	 * Clear the current input value on the click
 	 * @param e
 	 */
-	onFileClick:          function (e) {
+	onFileClick:                 function (e) {
 		e.target.value = "";
 	},
 	/**
 	 * Event on the file change
 	 * @param e
 	 */
-	onFileChange:         function (e) {
-		var self      = this;
-		var file      = e.target.files[0];
-		self.p12      = {};
-		self.p7       = {};
+	onFileChange:                function (e) {
+		var self = this;
+		var file = e.target.files[0];
+		self.p12 = {};
+		self.p7  = {};
 		self.disableUpload();
 		if (!file) {
 			return;
@@ -482,12 +482,12 @@ var CertificateBlock = Backbone.View.extend({
 				}
 			}
 			else {
-
 				try {
-					self.p7 = forge.pkcs7.messageFromPem(contents);
+					self.p7 = forge.pkcs7.messageFromAsn1(forge.asn1.fromDer(contents));
 					self.enableUpload();
 				}
 				catch (exception) {
+					console.log(exception);
 					self.pushMessage(t("Incorrect p7b file format"), "danger", "private");
 				}
 			}
@@ -495,7 +495,7 @@ var CertificateBlock = Backbone.View.extend({
 		};
 		reader.readAsBinaryString(file);
 	},
-	onUploadSslClick:     function (e) {
+	onUploadSslClick:            function (e) {
 		var messageKey = "public";
 		var self       = this;
 		var file       = document.getElementById("ssl-file-certificate").files[0];
@@ -518,7 +518,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * Upload SSL certificate
 	 * @param bytes
 	 */
-	uploadSslFile:        function (bytes) {
+	uploadSslFile:               function (bytes) {
 		var deferred     = $.Deferred();
 		var self         = this;
 		var messageKey   = "public";
@@ -536,7 +536,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * Event on the upload click
 	 * @param e
 	 */
-	onUploadClick:        function (e) {
+	onUploadClick:               function (e) {
 		if (_.isEmpty(this.p12) && _.isEmpty(this.p7)) {
 			this.pushMessage(t("Incorrect file format"), "danger", "private");
 			return;
@@ -551,7 +551,7 @@ var CertificateBlock = Backbone.View.extend({
 		 * and wait until the finish
 		 * @type {*[]}
 		 */
-		var promises     = this.getPromisesForUpload();
+		var promises = this.getPromisesForUpload();
 		$.when.apply($, promises).then(function (responseKey, responseCert) {
 			$(wrapperBlock).removeClass("active");
 			var responses = [responseKey, responseCert];
@@ -577,7 +577,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * Form promises for the private key and certificate upload
 	 * @returns {*[]}
 	 */
-	getPromisesForUpload: function () {
+	getPromisesForUpload:        function () {
 		if (!_.isEmpty(this.p12)) {
 			var privateKey  = this.getPrivateKey();
 			var certificate = this.getCertificate();
@@ -593,9 +593,9 @@ var CertificateBlock = Backbone.View.extend({
 	 * @param responseArray
 	 * @returns {boolean}
 	 */
-	isResponseSuccess:    function (responseArray) {
+	isResponseSuccess:           function (responseArray) {
 		var isSuccess = true;
-		var self = this;
+		var self      = this;
 		if (responseArray.length == 2 && _.isString(responseArray[1])) {
 			return this.isResponseSuccessForRequest(responseArray);
 		}
@@ -611,28 +611,28 @@ var CertificateBlock = Backbone.View.extend({
 	 * @param response
 	 * @returns {boolean}
 	 */
-	isResponseSuccessForRequest:    function (response) {
+	isResponseSuccessForRequest: function (response) {
 		return !!(_.isArray(response) && response[1] == "success" && parseInt(response[0].verify));
 
 	},
 	/**
 	 * Enable the file upload
 	 */
-	enableUpload:         function () {
+	enableUpload:                function () {
 		this.$el.find(this.btnUpload).prop('disabled', false);
 		this.clearMessage();
 	},
 	/**
 	 * Disable the file upload
 	 */
-	disableUpload:        function () {
+	disableUpload:               function () {
 
 	},
 	/**
 	 * Extract the private key from p12
 	 * @returns {*}
 	 */
-	getPrivateKey:        function () {
+	getPrivateKey:               function () {
 		var keyBags = this.p12.getBags({bagType: forge.pki.oids.pkcs8ShroudedKeyBag});
 		var bag     = keyBags[forge.pki.oids.pkcs8ShroudedKeyBag][0];
 		return bag.key;
@@ -641,7 +641,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * Extract the certificate from p12
 	 * @returns {r|*|null}
 	 */
-	getCertificate:       function () {
+	getCertificate:              function () {
 		var bags    = this.p12.getBags({bagType: forge.pki.oids.certBag});
 		var cert    = bags[forge.pki.oids.certBag][0];
 		window.cert = cert;
@@ -652,7 +652,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * @param str
 	 * @returns {Uint8Array}
 	 */
-	encodeStringToBinary: function (str) {
+	encodeStringToBinary:        function (str) {
 		var bytes = new Uint8Array(str.length);
 		for (var i = 0; i < str.length; i++)
 			bytes[i] = str.charCodeAt(i);
@@ -665,7 +665,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * @param binaryData
 	 * @returns {*}
 	 */
-	uploadFileToServer:   function (pemString, url, binaryData) {
+	uploadFileToServer:          function (pemString, url, binaryData) {
 		if (_.isUndefined(binaryData)) {
 			binaryData = this.encodeStringToBinary(forge.pki.pemToDer(pemString).data);
 		}
@@ -686,7 +686,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * @param type
 	 * @param fileType
 	 */
-	pushMessage:          function (message, type, fileType) {
+	pushMessage:                 function (message, type, fileType) {
 		var alert        = new Alert({
 			model: {
 				type:    type,
@@ -701,20 +701,20 @@ var CertificateBlock = Backbone.View.extend({
 	 * Get the block with message
 	 * @returns {*}
 	 */
-	getMessageBlock:      function (fileType) {
+	getMessageBlock:             function (fileType) {
 		return this.$el.find('.cert-upload.' + fileType).find(".message");
 	},
 	/**
 	 * Clear the message
 	 */
-	clearMessage:         function () {
+	clearMessage:                function () {
 		this.getMessageBlock().empty();
 	},
 	/**
 	 * Clear the P12 certificate
 	 * @param event
 	 */
-	onRemoveP12Click:     function (event) {
+	onRemoveP12Click:            function (event) {
 		var self     = this;
 		var promises = [];
 		promises.push(this.clearCertificate(this.urlCertificate));
@@ -742,7 +742,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * Clear SSL certificate
 	 * @param event
 	 */
-	onRemoveSSLClick:     function (event) {
+	onRemoveSSLClick:            function (event) {
 		var deferred = $.Deferred();
 		$(event.target).addClass('active');
 		var self     = this;
@@ -763,7 +763,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * @param url
 	 * @returns {*}
 	 */
-	clearCertificate:     function (url) {
+	clearCertificate:            function (url) {
 		return $.ajax({
 			url:         url,
 			data:        "123",
@@ -777,7 +777,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * Upload SSL certificate using server file on help-micro
 	 * @param event
 	 */
-	onUploadSslServer:    function (event) {
+	onUploadSslServer:           function (event) {
 		var deferred = $.Deferred();
 		deferred.resolve();
 		//var self                   = this;
@@ -816,14 +816,15 @@ var CertificateBlock = Backbone.View.extend({
 	 * Generate CSR
 	 * @param e
 	 */
-	onGenerateCSRClick:   function (e) {
+	onGenerateCSRClick:          function (e) {
 		var button = $(e.target);
 		var self   = this;
 		$(button).button('loading');
 		this.getSerialNumber().done(function (serialNumber) {
 			self.generateCSRAndKeys(serialNumber).done(function (csr) {
 				var pem = forge.pki.certificationRequestToPem(csr);
-				downloadString(pem, 'text/plain', 'CSR.csr');
+				var der = forge.pki.pemToDer(pem);
+				downloadBlob(self.encodeStringToBinary(der.data), 'CSR.der', 'application/octet-stream');
 				$(button).button('reset');
 			}).fail(function () {
 				self.pushMessage(t("Private key wasn't generated"), "danger", "private");
@@ -841,7 +842,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * @param serialNumber
 	 * @returns {*}
 	 */
-	generateCSRAndKeys:   function (serialNumber) {
+	generateCSRAndKeys:          function (serialNumber) {
 		var deferred = $.Deferred();
 		var self     = this;
 
@@ -853,22 +854,25 @@ var CertificateBlock = Backbone.View.extend({
 		csr.publicKey = keys.publicKey;
 		csr.setSubject([{
 			name:  'commonName',
-			value: serialNumber
+			value: 'ANAF certificate'
 		}, {
 			name:  'countryName',
-			value: 'UA'
+			value: 'BG'
 		}, {
 			shortName: 'ST',
-			value:     'Kyiv'
+			value:     'Silistra'
 		}, {
 			name:  'localityName',
-			value: 'Kyiv'
+			value: 'Silistra'
 		}, {
 			name:  'organizationName',
-			value: 'Help Micro Ltd'
+			value: 'Orgtechnika Ltd.'
+		}, {
+			name:  'serialName',
+			value: serialNumber
 		}, {
 			shortName: 'OU',
-			value:     'Help Micro'
+			value:     'Orgtechnika'
 		}]);
 
 		// sign certification request
@@ -889,7 +893,7 @@ var CertificateBlock = Backbone.View.extend({
 	 * Get serial number of the device
 	 * @returns {*}
 	 */
-	getSerialNumber:      function () {
+	getSerialNumber:             function () {
 		var deferred = $.Deferred();
 		$.ajax({
 			url:      '/cgi/state',
@@ -1191,7 +1195,6 @@ var ReportANAFPage = PageView.extend({
 						if (response.lastExportedZ < response.lastZ) {
 							response.lastExportedZ++;
 						}
-						console.log(data, data[self.fieldANAFLastZ], self.fieldANAFLastZ);
 						return deferred.resolve(response);
 					},
 					error:    function () {
@@ -1317,22 +1320,24 @@ var ReportANAFPage = PageView.extend({
 		/**
 		 * Fetch A4200 XML file
 		 */
-		$.ajax({
-			url:     self.urlA4200,
-			type:    'GET',
-			data:    {
-				from: start,
-				to:   end
-			},
-			success: function (response) {
+		var oReq          = new XMLHttpRequest();
+		oReq.open("GET", self.urlA4200 + "?from=" + start + "&to=" + end, true);
+		oReq.responseType = "blob";
+
+		oReq.onload = function (oEvent) {
+			if (oReq.status != HTTP_STATUS_OK) {
+				self.onErrorEvent(t('Error while processing a4200 file'));
+			}
+			else {
+				var blob     = oReq.response;
 				/**
 				 * Push A4200 file
 				 */
 				files.push({
 					name:    'a4200_' + start + '_' + end,
-					content: xmlToString(response)
+					content: blob
 				});
-				console.log('after first push');
+
 				/**
 				 * Process all A4203 files from given range
 				 */
@@ -1388,11 +1393,15 @@ var ReportANAFPage = PageView.extend({
 						}
 					}
 				});
-			},
-			error:   function () {
-				self.onErrorEvent(t('Connection failed'));
 			}
-		})
+
+		};
+
+		oReq.onerror = function () {
+			self.onErrorEvent(t('Connection failed'));
+		};
+
+		oReq.send();
 	},
 	/**
 	 * Generate A4203 files in recursive way
@@ -1414,20 +1423,24 @@ var ReportANAFPage = PageView.extend({
 		/**
 		 * Fetch A4203 file by the given Z-report number
 		 */
-		$.ajax({
-			url:     self.urlA4203,
-			type:    'GET',
-			data:    {
-				z: currentZ
-			},
-			success: function (response) {
+		var oReq = new XMLHttpRequest();
+		oReq.open("GET", self.urlA4203 + "?z=" + currentZ, true);
+		oReq.responseType = "blob";
 
+		oReq.onload = function(oEvent) {
+
+			if (oReq.status != HTTP_STATUS_OK) {
+				self.onErrorEvent(sprintf(t('Error while processing Z-report with number %d'), currentZ));
+			}
+
+			else {
+				var blob = oReq.response;
 				/**
 				 * Push response to file array
 				 */
 				files.push({
 					name:    'a4203_' + currentZ,
-					content: xmlToString(response)
+					content: blob
 				});
 
 				/**
@@ -1441,11 +1454,14 @@ var ReportANAFPage = PageView.extend({
 				else {
 					callback(files);
 				}
-			},
-			error:   function () {
-				self.onErrorEvent(sprintf(t('Error while processing Z-report with number %d'), currentZ));
 			}
-		})
+
+		};
+
+		oReq.onerror = function () {
+			self.onErrorEvent(sprintf(t('Error while processing Z-report with number %d'), currentZ));
+		};
+		oReq.send();
 	},
 	/**
 	 * Generate ZIP-archive from the files
@@ -1454,12 +1470,10 @@ var ReportANAFPage = PageView.extend({
 	 * @param end
 	 */
 	generateZIPArchive: function (files, start, end) {
-		console.log('generate ZIP archive');
 		$('body').removeClass('preloading');
 		var zip = new JSZip();
 		_.each(files, function (file) {
-			console.log('file', file);
-			zip.file(file.name + '.xml', file.content);
+			zip.file(file.name + '.p7b', file.content);
 		});
 		zip.generateAsync({type: "blob"}).then(function (content) {
 			saveAs(content, t('Export') + '_' + start + '_' + end + '.zip');

@@ -202,7 +202,6 @@ var appStart = function () {
 	var initModel = new InitializeDataModel();
 
 	$.when(qryDone, schemaLoaded, initModel.initializeData(), fiscalCell.initializeData()).always(function () {
-		console.log(schema.get('PLU'));
 		$.when(eetModel.initializeData()).always(function () {
 			if (schema.get('PLU')) {
 				mainScreenCells.unshift(new MainCell({
