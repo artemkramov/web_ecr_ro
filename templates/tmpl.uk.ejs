@@ -128,3 +128,50 @@
         </div>
     </div>
 </script>
+
+<script type="text/template" id="fisc-tmpl">
+    <div class="error-block"></div>
+    <button class="btn btn-success btn-fisc-save"><i class="glyphicon glyphicon-cog"></i> <%= label %></button>
+</script>
+
+<script type="text/template" id="electronic-journal-tmpl">
+    <div class="form-group"></div>
+    <div class="form-group">
+        <% if (isJournalOn) { %>
+            <label><%= t("Electronic journal is turned on") %></label><br/>
+            <button class="btn btn-primary" id="btn-journal-turn-off"><i class="glyphicon glyphicon-remove-circle"></i> <%= t("Turn off journal") %></button>
+        <% } else { %>
+        <label><%= t("Electronic journal is turned off") %></label><br/>
+        <button class="btn btn-success" id="btn-journal-turn-on"><i class="glyphicon glyphicon-ok-circle"></i> <%= t("Turn on journal") %></button>
+        <% } %>
+    </div>
+    <div class="form-group">
+        <div class="error-block"></div>
+    </div>
+    <div class="form-group">
+        <table class="table table-striped">
+            <tbody>
+            <tr>
+                <td><b><%= t("EJ number") %></b></td>
+                <td><%= EjNumber %></td>
+            </tr>
+            <tr>
+                <td><b><%= t("Z1 number") %></b></td>
+                <td><%= Z1Number %></td>
+            </tr>
+            <tr>
+                <td><b><%= t("Serial number") %></b></td>
+                <td><%= serial %></td>
+            </tr>
+            <tr>
+                <td><b><%= t("Fiscal number") %></b></td>
+                <td><%= FiscalNumber %></td>
+            </tr>
+            <tr>
+                <td><b><%= t("Tax number") %></b></td>
+                <td><%= TaxNumber %></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</script>

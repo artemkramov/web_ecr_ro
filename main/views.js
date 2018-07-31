@@ -147,16 +147,10 @@ var ConfirmModal = Modal.extend({
 	callbackConfirm: function () {
 	},
 
-	callbackCancel: function () {
-	},
-
 	autoClose: false,
 
-	setCallback:   function (callback, callbackCancel) {
+	setCallback:   function (callback) {
 		this.callbackConfirm = callback;
-		if (!_.isUndefined(callbackCancel)) {
-			this.callbackCancel = callbackCancel;
-		}
 		this.setButtons(this.buttons());
 	},
 	buttons:       function () {
@@ -178,7 +172,6 @@ var ConfirmModal = Modal.extend({
 		events.trigger('clickDlg', 'hide');
 	},
 	handleCancel:  function () {
-		this.callbackCancel();
 		this.$el.off('click', '.modal-footer button');
 		this.hide();
 	},
@@ -390,12 +383,13 @@ var MainScreenView = Backbone.View.extend({
 		if (this.cells) {
 			var row = false;
 			var cnt = 0;
-			for (var cell in this.cells) {
+			window.cells = this.cells;
+			for (var cellItem in this.cells) {
 				if (cnt == 0) {
 					row = $('<div class="row"></div>');
 					this.$el.append(row);
 				}
-				row.append(this.cells[cell].render().$el);
+				row.append(this.cells[cellItem].render().$el);
 				cnt++;
 				if (cnt == this.inrow) cnt = 0;
 			}
@@ -1607,7 +1601,11 @@ var TableContainer = Backbone.View.extend({
 			msg = field + ': ' + msg;
 		}
 		if (src.collection) {
-			msg = src.id + ': ' + msg;
+			var errorTitle = src.id;
+			if (_.isUndefined(errorTitle)) {
+				errorTitle = t("Error");
+			}
+			msg = errorTitle + ': ' + msg;
 		}
 		this.insertAlert(msg);
 	},

@@ -105,6 +105,43 @@ var FiscalCell = Backbone.Model.extend({
 		})
 
 		return deferred.promise();
+	},
+	initializeFiscalMode:  function () {
+		var deferred = $.Deferred();
+		var $this    = this;
+		$.getJSON("/cgi/state", function (response) {
+			/**
+			 * Check if the device is in the fiscal mode
+			 */
+			if (!_.isUndefined(response["FskMode"])) {
+				$this.set("isFiscalPrinter", true);
+			}
+			String.prototype.contains = function(it) { return this.indexOf(it) != -1; };
+			/**
+			 * Load last fiscalization report
+			 */
+			$.getJSON("/cgi/tbl/FDay?s=-1", function (data) {
+				if (_.isArray(data)) data = data[0];
+				if (_.isObject(data)) {
+					if ('id' in data) {
+						$this.set('lastRep', data.id);
+					}
+					if ('Date' in data) {
+						$this.set('lastTime', new Date(data.Date * 1000));
+					}
+				}
+				/**
+				 * If the response has a field fiscalization
+				 * than set it as fiscalization
+				 */
+				if (!_.isUndefined(response["Fiscalization"])) {
+					$this.set("fiscalize", response["Fiscalization"]);
+					return deferred.resolve();
+				}
+			});
+
+		});
+		return deferred.promise();
 	}
 });
 
@@ -555,5 +592,20 @@ var FiscalBackupModel = Backbone.Model.extend({
 		'url': '',
 		'url_int': '',
 		'fm_blank': -1
+	}
+});
+
+/**
+ * Model which contains info about the state of the electronic journal
+ */
+var ElectronicJournalModel = Backbone.Model.extend({
+	'url': '/cgi/state',
+	defaults: {
+		isJournalOn: false,
+		EjNumber: '-',
+		Z1Number: '-',
+		serial: '-',
+		FiscalNumber: '-',
+		TaxNumber: '-'
 	}
 });

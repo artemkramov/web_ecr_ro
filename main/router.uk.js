@@ -90,19 +90,35 @@ var AppRouter = Backbone.Router.extend({
 		this.view = new PagesScreen({no: this.modemTab, models: modemPages});
 	},
 	fisc:       function (page) {
+		var counter = 3;
+		var fiscalizationTab = 2;
+		if (fiscalCell.get('fiscalize')) {
+			fiscalizationTab = -1;
+			counter = 2;
+		}
 		switch (page) {
-			case "fisc":
+			case "hdr":
 				this.fiscTab = 0;
 				break;
-			case "report":
+			case "taxes":
 				this.fiscTab = 1;
 				break;
+			case "fisc":
+				this.fiscTab = fiscalizationTab;
+				break;
+			case "report":
+				this.fiscTab = counter;
+				break;
 			case "time":
-				this.fiscTab = 2;
+				this.fiscTab = counter + 1;
 				break;
-			case "reset":
-				this.fiscTab = 3;
+			case "cert":
+				this.fiscTab = counter + 2;
 				break;
+			case "ejournal":
+				this.fiscTab = counter + 3;
+				break;
+
 		}
 		this.view = new PagesScreen({no: this.fiscTab, models: fiscalPages});
 	},
@@ -154,7 +170,7 @@ var appStart = function () {
 		}),
 		new MainCell({
 			model: new Backbone.Model({
-				lnk:     '#fm', img: 'fm', name: 'Fiscal',
+				lnk:     '#fm', img: 'fm', name: 'Service',
 				addView: new FiscalView({model: fiscalCell})
 			})
 		}),
@@ -201,7 +217,7 @@ var appStart = function () {
 
 	var initModel = new InitializeDataModel();
 
-	$.when(qryDone, schemaLoaded, initModel.initializeData(), fiscalCell.initializeData()).always(function () {
+	$.when(qryDone, schemaLoaded, initModel.initializeData(), fiscalCell.initializeFiscalMode()).always(function () {
 		$.when(eetModel.initializeData()).always(function () {
 			if (schema.get('PLU')) {
 				mainScreenCells.unshift(new MainCell({
@@ -222,11 +238,37 @@ var appStart = function () {
 				}));
 			}
 
+			/**
+			 * Prepare fiscal pages
+			 */
+
+			var certificateBlock = new CertificateBlock();
+			certificateBlock.dataModel = eetModel;
+
+			var fiscTax = new FiscView();
+			fiscTax.schemaName = 'Tax';
+
+			var fiscDo = new FiscView();
+			fiscDo.schemaName = 'Fsk';
+
+			var fiscHdr = new FiscView();
+			fiscHdr.schemaName = 'Hdr';
+
+			var fiscJournal = new ElectronicJournalPage({
+				model: new ElectronicJournalModel()
+			});
+
 			fiscalPages  = [
-				{lnk: '#fm/fisc', name: 'Fiscalization', page: new FiscDo()},
+				{lnk: '#fm/hdr', name: 'Headers', page: fiscHdr},
+				{lnk: '#fm/taxes', name: 'Taxes', page: fiscTax},
 				{lnk: '#fm/report', name: 'Reports', page: new ReportANAFPage()},
 				{lnk: '#fm/time', name: 'Time', page: new FiscTime()},
+				{lnk: '#fm/cert', name: 'Certificates', page: certificateBlock},
+				{lnk: '#fm/ejournal', name: 'Electronic journal', page: fiscJournal}
 			];
+			if (!fiscalCell.get("fiscalize")) {
+				fiscalPages.splice(2, 0, {lnk: '#fm/fisc', name: 'Fiscalization', page: fiscDo});
+			}
 			var models   = schema.tableGroup('net');
 			networkViews = [new InterfacesTable()];
 			if (gprsExists) {

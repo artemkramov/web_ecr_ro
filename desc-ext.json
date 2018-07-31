@@ -192,7 +192,18 @@
       "Cannot read serial number of the device": "Cannot read serial number of the device",
       "Private key wasn't generated": "Private key wasn't generated",
       "Incorrect p7b file format": "Incorrect p7b file format",
-      "Error while processing a4200 file": "Error while processing a4200 file"
+      "Error while processing a4200 file": "Error while processing a4200 file",
+      "Certificates": "Certificates",
+      "Put headers to fiscal memory": "Put headers to fiscal memory",
+      "Put taxes to fiscal memory": "Put taxes to fiscal memory",
+      "Changes were applied!": "Changes were applied!",
+      "Electronic journal is turned on": "Electronic journal is turned on",
+      "Electronic journal is turned off": "Electronic journal is turned off",
+      "Turn off journal": "Turn off journal",
+      "Turn on journal": "Turn on journal",
+      "Electronic journal": "Electronic journal",
+      "Service": "Service"
+
     }
   }
 }
