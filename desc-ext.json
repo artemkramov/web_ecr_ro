@@ -197,12 +197,20 @@
       "Put headers to fiscal memory": "Put headers to fiscal memory",
       "Put taxes to fiscal memory": "Put taxes to fiscal memory",
       "Changes were applied!": "Changes were applied!",
-      "Electronic journal is turned on": "Electronic journal is turned on",
-      "Electronic journal is turned off": "Electronic journal is turned off",
-      "Turn off journal": "Turn off journal",
-      "Turn on journal": "Turn on journal",
+      "Electronic journal is not initialized": "Electronic journal is not initialized",
+      "Electronic journal is closed": "Electronic journal is closed",
+      "Electronic journal is opened": "Electronic journal is opened",
+      "Initialize journal": "Initialize journal",
+      "Open journal": "Open journal",
+      "Close journal": "Close journal",
       "Electronic journal": "Electronic journal",
-      "Service": "Service"
+      "Service": "Service",
+      "Electronic journal ID": "Electronic journal ID",
+      "Stop date": "Stop date",
+      "Start date": "Start date",
+      "First Z-report number": "First Z-report number",
+      "Last Z-report number": "Last Z-report number",
+      "Are you sure you want to perform this operation?": "Are you sure you want to perform this operation?"
 
     }
   }

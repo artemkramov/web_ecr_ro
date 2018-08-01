@@ -107,12 +107,14 @@
 
                     <div class="form-group-range-item">
                         <label for="start"><%= t('Start number') %></label>
-                        <input type="number" value="<%= lastExportedZ %>" class="form-control form-report-range" name="start" min="0" id="start" required readonly />
+                        <input type="number" value="<%= lastExportedZ %>" class="form-control form-report-range"
+                               name="start" min="0" id="start" required readonly/>
                     </div>
 
                     <div class="form-group-range-item">
                         <label for="end"><%= t('End number') %></label>
-                        <input type="number" value="<%= lastZ %>" name="end" min="0" class="form-control form-report-range" id="end" required readonly />
+                        <input type="number" value="<%= lastZ %>" name="end" min="0"
+                               class="form-control form-report-range" id="end" required readonly/>
                     </div>
                 </div>
 
@@ -137,13 +139,20 @@
 <script type="text/template" id="electronic-journal-tmpl">
     <div class="form-group"></div>
     <div class="form-group">
-        <% if (isJournalOn) { %>
-            <label><%= t("Electronic journal is turned on") %></label><br/>
-            <button class="btn btn-primary" id="btn-journal-turn-off"><i class="glyphicon glyphicon-remove-circle"></i> <%= t("Turn off journal") %></button>
-        <% } else { %>
-        <label><%= t("Electronic journal is turned off") %></label><br/>
-        <button class="btn btn-success" id="btn-journal-turn-on"><i class="glyphicon glyphicon-ok-circle"></i> <%= t("Turn on journal") %></button>
+        <% if (state == -1) { %>
+            <label><%= t("Electronic journal is not initialized") %></label><br/>
+            <button class="btn btn-primary" id="btn-journal-initialize"><i
+                        class="glyphicon glyphicon-certificate"></i> <%= t("Initialize journal") %></button>
         <% } %>
+        <% if (state == 0) { %>
+            <label><%= t("Electronic journal is opened") %></label><br/>
+            <button class="btn btn-success" id="btn-journal-close"><i
+                        class="glyphicon glyphicon-remove"></i> <%= t("Close journal") %></button>
+        <% } %>
+        <% if (state == 1) { %>
+        <label><%= t("Electronic journal is closed") %></label>
+        <% } %>
+
     </div>
     <div class="form-group">
         <div class="error-block"></div>
@@ -152,24 +161,42 @@
         <table class="table table-striped">
             <tbody>
             <tr>
-                <td><b><%= t("EJ number") %></b></td>
-                <td><%= EjNumber %></td>
-            </tr>
-            <tr>
-                <td><b><%= t("Z1 number") %></b></td>
-                <td><%= Z1Number %></td>
-            </tr>
-            <tr>
                 <td><b><%= t("Serial number") %></b></td>
                 <td><%= serial %></td>
             </tr>
             <tr>
                 <td><b><%= t("Fiscal number") %></b></td>
-                <td><%= FiscalNumber %></td>
+                <td><%= FisNum %></td>
             </tr>
             <tr>
                 <td><b><%= t("Tax number") %></b></td>
-                <td><%= TaxNumber %></td>
+                <td>
+                    <% if (parseInt(IsRO)) { %>
+                    RO
+                    <% } %>
+                    <%= CUI %>
+                </td>
+            </tr>
+            <tr>
+                <td><b><%= t("Electronic journal ID") %></b></td>
+                <td><%= id %></td>
+            </tr>
+            <tr>
+                <td><b><%= t("Start date") %></b></td>
+                <td><%= dateStr(start_date) %></td>
+            </tr>
+            <tr>
+                <td><b><%= t("Stop date") %></b></td>
+                <td><%= dateStr(stop_date) %></td>
+            </tr>
+
+            <tr>
+                <td><b><%= t("First Z-report number") %></b></td>
+                <td><%= Z1_start %></td>
+            </tr>
+            <tr>
+                <td><b><%= t("Last Z-report number") %></b></td>
+                <td><%= Z1_stop %></td>
             </tr>
             </tbody>
         </table>

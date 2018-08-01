@@ -347,7 +347,7 @@ var FiscView = PageView.extend({
         var confirmModal = new ConfirmModal();
         confirmModal.set({
             header: t('Warning'),
-            body: t('Are you you want to perform this operation?')
+            body: t('Are you sure you want to perform this operation?')
         });
         confirmModal.setCallback(function () {
             confirmModal.hide();
@@ -1327,7 +1327,7 @@ var ElectronicJournalPage = PageView.extend({
     /**
      * Url gor procedure calling
      */
-    urlProcedure: '/cgi/proc/ejournal',
+    urlProcedure: '/cgi/ej_control/',
 
     /**
      * Template
@@ -1338,8 +1338,8 @@ var ElectronicJournalPage = PageView.extend({
      * Events and appropriate handlers
      */
     events: {
-        "click #btn-journal-turn-off": "onJournalOff",
-        "click #btn-journal-turn-on": "onJournalOn",
+        "click #btn-journal-initialize": "onJournalInit",
+        "click #btn-journal-close": "onJournalClose",
         "click #btn-journal-refresh": "onRefreshClick"
     },
 
@@ -1363,26 +1363,14 @@ var ElectronicJournalPage = PageView.extend({
     render: function () {
         var self = this;
         this.delegateEvents();
-        this.$el.empty();
-
-        /**
-         * Check if this is the first call of this function
-         */
-        if (this.initProcess) {
-            /**
-             * Fetch settings from the device
-             * and than render view
-             */
-            this.model.fetch({silent: true}).done(function () {
-                self.initProcess = false;
-                self.$el.append(self.template(self.model.toJSON()));
-            }).fail(function () {
-                alert('Cannot fetch data from ' + self.model.url);
-            });
-        }
-        else {
+        this.model.fetch({silent: true}).done(function () {
+            console.log(self.model.toJSON());
+            self.$el.empty();
             self.$el.append(self.template(self.model.toJSON()));
-        }
+        }).fail(function () {
+            alert('Cannot fetch data from ' + self.model.url);
+        });
+
         return this;
     },
     /**
@@ -1404,15 +1392,45 @@ var ElectronicJournalPage = PageView.extend({
      * On journal off click
      * @param e
      */
-    onJournalOff: function (e) {
-        this.changeJournalState(0, e.target);
+    onJournalInit: function (e) {
+        var self = this;
+        var confirmModal = new ConfirmModal();
+        confirmModal.set({
+            header: t('Warning'),
+            body: t('Are you sure you want to perform this operation?')
+        });
+        confirmModal.autoClose = true;
+
+        /**
+         * Set callbacks for both 'Yes' and 'No' options
+         */
+        confirmModal.setCallback(function () {
+            self.changeJournalState(0, e.target);
+        }, function () {
+        });
+        confirmModal.show();
     },
     /**
      * On journal on click
      * @param e
      */
-    onJournalOn: function (e) {
-        this.changeJournalState(1, e.target);
+    onJournalClose: function (e) {
+        var self = this;
+        var confirmModal = new ConfirmModal();
+        confirmModal.set({
+            header: t('Warning'),
+            body: t('Are you sure you want to perform this operation?')
+        });
+        confirmModal.autoClose = true;
+
+        /**
+         * Set callbacks for both 'Yes' and 'No' options
+         */
+        confirmModal.setCallback(function () {
+            self.changeJournalState(1, e.target);
+        }, function () {
+        });
+        confirmModal.show();
     },
     /**
      * Change the state of the journal
@@ -1422,8 +1440,15 @@ var ElectronicJournalPage = PageView.extend({
     changeJournalState: function (state, button) {
         $(button).button("loading");
         var self = this;
+        var url = this.urlProcedure;
+        if (state == 0) {
+            url += 'start';
+        }
+        if (state == 1) {
+            url += 'stop';
+        }
         $.ajax({
-            url: self.urlProcedure + '?' + state.toString(),
+            url: url,
             type: 'get',
             success: function (response) {
                 $(button).button("reset");

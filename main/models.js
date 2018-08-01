@@ -600,12 +600,37 @@ var FiscalBackupModel = Backbone.Model.extend({
  */
 var ElectronicJournalModel = Backbone.Model.extend({
 	'url': '/cgi/state',
+	'urlSecond': '/cgi/ej_state',
 	defaults: {
-		isJournalOn: false,
-		EjNumber: '-',
-		Z1Number: '-',
+		state: -1,
+		start_date: '-',
+		stop_date: '-',
+		id: '-',
+		Z1_start: '-',
+		Z1_stop: '-',
 		serial: '-',
-		FiscalNumber: '-',
-		TaxNumber: '-'
+		FisNum: '-',
+		CUI: '-'
+	},
+	fetch: function (options) {
+		var deferred = $.Deferred();
+		var self = this;
+		Backbone.Model.prototype.fetch.call(this, options).done(function () {
+			$.ajax({
+				url: self.urlSecond,
+				type: 'get',
+				dataType: 'json',
+				success: function (data) {
+					self.set(data, options);
+					deferred.resolve();
+				},
+				error: function () {
+					deferred.reject();
+				}
+			});
+		}).fail(function () {
+			deferred.reject();
+		});
+		return deferred.promise();
 	}
 });
