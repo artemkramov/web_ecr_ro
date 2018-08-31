@@ -140,14 +140,14 @@
     <div class="form-group"></div>
     <div class="form-group">
         <% if (state == -1) { %>
-            <label><%= t("Electronic journal is not initialized") %></label><br/>
-            <button class="btn btn-primary" id="btn-journal-initialize"><i
-                        class="glyphicon glyphicon-certificate"></i> <%= t("Initialize journal") %></button>
+        <label><%= t("Electronic journal is not initialized") %></label><br/>
+        <button class="btn btn-primary" id="btn-journal-initialize"><i
+                    class="glyphicon glyphicon-certificate"></i> <%= t("Initialize journal") %></button>
         <% } %>
         <% if (state == 0) { %>
-            <label><%= t("Electronic journal is opened") %></label><br/>
-            <button class="btn btn-success" id="btn-journal-close"><i
-                        class="glyphicon glyphicon-remove"></i> <%= t("Close journal") %></button>
+        <label><%= t("Electronic journal is opened") %></label><br/>
+        <button class="btn btn-success" id="btn-journal-close"><i
+                    class="glyphicon glyphicon-remove"></i> <%= t("Close journal") %></button>
         <% } %>
         <% if (state == 1) { %>
         <label><%= t("Electronic journal is closed") %></label>
@@ -201,4 +201,88 @@
             </tbody>
         </table>
     </div>
+</script>
+
+<script type="text/template" id="chk-io-tmpl">
+    <div class="form-group"></div>
+    <h3><%= t("Input/output") %></h3>
+    <hr/>
+    <div class="form-group">
+        <label for="chk-io-input"><%= t("Sum") %></label>
+        <input type="text" class="form-control" value="" id="chk-io-input"/>
+    </div>
+    <div class="form-group">
+        <label for="chk-io-payment"><%= t("Payment type") %></label>
+        <select class="form-control" id="chk-io-payment">
+            <% _.each(paymentList, function (item) { %>
+            <option value="<%= item.id %>"><%= item.title %></option>
+            <% }) %>
+        </select>
+    </div>
+    <div class="form-group">
+        <button type="button" class="btn btn-primary" id="btn-io-input"><%= t("Input") %></button>
+        <button type="button" class="btn btn-danger" id="btn-io-output"><%= t("Output") %></button>
+    </div>
+    <div class="error-block"></div>
+</script>
+
+<script type="text/template" id="chk-work-tmpl">
+    <div class="form-group"></div>
+    <h3><%= t("Cashier mode") %></h3>
+    <hr/>
+    <div class="error-block"></div>
+    <div class="row">
+        <div class="col-xs-12 col-sm-4">
+            <div class="form-group">
+                <label for="chk-sale-input"><%= t("Sum") %></label>
+                <input type="text" class="form-control" value="" id="chk-sale-input"/>
+            </div>
+            <div class="form-group">
+                <label for="chk-sale-payment"><%= t("Payment type") %></label>
+                <select class="form-control" id="chk-sale-payment">
+                    <% _.each(paymentList, function (item) { %>
+                    <option value="<%= item.id %>"><%= item.title %></option>
+                    <% }) %>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-default" id="btn-chk-sale-pay">
+                    <i class="glyphicon glyphicon-shopping-cart"></i>
+                    <%= t("Pay") %>
+                </button>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-8">
+            <div class="pull-right">
+                <h4><%= t("Total amount") %>: <label id="chk-sale-total-amount">0</label> RON</h4>
+            </div>
+        </div>
+    </div>
+    <hr />
+    <div class="form-group">
+        <div class="row">
+            <div class="col-xs-12 col-sm-4">
+                <div class="form-group">
+                    <label for="input-manual-code"><%= t("Add product by code") %></label>
+                    <input type="text" class="form-control" id="input-manual-code" value="" autofocus/>
+                </div>
+                <button class="btn btn-primary" id="btn-chk-add-product">
+                    <i class="glyphicon glyphicon-plus"></i>
+                    <%= t("Add product") %>
+                </button>
+            </div>
+            <div class="col-xs-12 col-sm-8">
+                <button class="btn btn-default pull-right" id="btn-chk-refresh-products">
+                    <i class="glyphicon glyphicon-refresh"></i>
+                    <%= t("Refresh product list") %>
+                </button>
+                <button class="btn btn-danger pull-right" id="btn-remove-selected-products">
+                    <i class="glyphicon glyphicon-minus"></i>
+                    <%= t("Remove selected items") %>
+                </button>
+            </div>
+        </div>
+    </div>
+    <hr/>
+
 </script>

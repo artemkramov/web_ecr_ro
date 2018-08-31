@@ -394,3 +394,15 @@ body.preloading .preloader, body.uploading .file-loader {
 .csr-generation {
     margin-top: 20px;
 }
+
+#chk-io-input {
+    max-width: 130px;
+}
+
+#input-auto-code {
+    width: 0;
+}
+
+#btn-chk-refresh-products {
+    margin-left: 10px;
+}

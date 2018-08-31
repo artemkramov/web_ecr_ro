@@ -869,6 +869,7 @@ var ImportModel = (function () {
 		 * @returns {*}
 		 */
 		processData:                function (parsedData, modelData, tableData, options) {
+			console.log(arguments);
 			var deferred         = $.Deferred();
 			var self             = this;
 			var modelDataHistory = {

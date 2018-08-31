@@ -610,7 +610,8 @@ var ElectronicJournalModel = Backbone.Model.extend({
 		Z1_stop: '-',
 		serial: '-',
 		FisNum: '-',
-		CUI: '-'
+		CUI: '-',
+		IsRO: 0
 	},
 	fetch: function (options) {
 		var deferred = $.Deferred();
@@ -632,5 +633,118 @@ var ElectronicJournalModel = Backbone.Model.extend({
 			deferred.reject();
 		});
 		return deferred.promise();
+	}
+});
+
+var ChkModel = Backbone.Model.extend({
+
+	url: '/cgi/chk',
+	defaults: {
+		totalAmount: 0
+	},
+
+	sendPayment: function (isIn, sum, paymentType) {
+		var deferred = $.Deferred();
+		if (_.isNumber(sum) && !isIn) {
+			sum = -sum;
+		}
+		var price = this.readPrice(sum);
+		if (isNaN(price)) {
+			return deferred.reject(t("Sum is not correct"));
+		}
+		var data = {
+			IO: {
+				IO: {
+					sum: price,
+					no: paymentType
+				}
+			}
+		};
+		this.sendRequestToDevice(data).done(function () {
+			return deferred.resolve();
+		}).fail(function (errorMessage) {
+			return deferred.reject(errorMessage);
+		});
+		return deferred.promise();
+	},
+	sendSale: function (sum, paymentType, collection) {
+		var deferred = $.Deferred();
+		var price = this.readPrice(sum);
+		var self = this;
+		if (isNaN(price)) {
+			return deferred.reject(t("Sum is not correct"));
+		}
+		if (parseFloat(price) < this.get('totalAmount')) {
+			return deferred.reject(t("Payment sum must be bigger than total amount"));
+		}
+		var data = {
+			F: [{
+				P: {
+					sum: price,
+					no: paymentType
+				}
+			}]
+		};
+		_.each(collection.models, function (model) {
+			data.F.push({
+				S: {
+					code: model.get("Code"),
+					qty: self.readQuantity(model.get("Quantity"))
+				}
+			});
+		});
+		this.sendRequestToDevice(data).done(function () {
+			return deferred.resolve();
+		}).fail(function (errorMessage) {
+			return deferred.reject(errorMessage);
+		});
+		return deferred.promise();
+	},
+	readPrice: function (price) {
+		var parsedPrice = parseFloat(price);
+		return isNaN(parsedPrice) ? NaN : parsedPrice.toFixed(2);
+	},
+	readQuantity: function (quantity) {
+		var parsedQuantity = parseFloat(quantity);
+		return isNaN(parsedQuantity) ? NaN : parsedQuantity.toFixed(3);
+	},
+	sendRequestToDevice: function (data) {
+		var deferred = $.Deferred();
+		var self = this;
+		$.ajax({
+			url: this.url,
+			type: 'POST',
+			data: JSON.stringify(data),
+			success: function (response) {
+				if (!_.isUndefined(response.err.e)) {
+					var errorMessage = schema.error(response.err.e);
+					return deferred.reject(errorMessage);
+				}
+				else {
+					return deferred.resolve();
+				}
+			},
+			error: function () {
+				return deferred.reject(t("Connection failed"));
+			}
+		});
+		return deferred.promise();
+	},
+	findProductByCode: function (code) {
+		return schema.tableIgnoreCache('PLU').select(function (model) {
+			return model.get('Code') == code;
+		});
+	}
+});
+
+var ChkProductList = Backbone.Collection.extend({
+
+});
+
+var ChkProductItem = Backbone.Model.extend({
+	defaults: {
+		Code: '',
+		Name: '',
+		Price: 0
 	}
 });

@@ -2055,6 +2055,313 @@ var CloudContainer = TableContainer.extend({
     }
 });
 
+var ChkPage = PageView.extend({
+    tablePay: 'Pay',
+    /**
+     * Show alert info message
+     * @param message
+     */
+    onInfoEvent: function (message) {
+        this.pushMessage(message, "info");
+    },
+    /**
+     * Show alert error message
+     * @param message
+     */
+    onErrorEvent: function (message) {
+        this.pushMessage(message, "danger");
+    },
+    /**
+     * Push alert message
+     * @param message
+     * @param type
+     */
+    pushMessage: function (message, type) {
+        var alert = new Alert({
+            model: {
+                type: type,
+                message: message
+            }
+        });
+        this.clearMessageBlock().append(alert.render().$el);
+    },
+    /**
+     * Clear error block
+     * @returns {*}
+     */
+    clearMessageBlock: function () {
+        return this.$el.find(".error-block").empty();
+    },
+    /**
+     * Transform Backbone collection to dropdown list
+     * @param collection
+     * @param fieldID
+     * @param fieldTitle
+     * @returns {Array}
+     */
+    collectionToList: function (collection, fieldID, fieldTitle) {
+        var list = [];
+        _.each(collection.models, function (item) {
+            var newItem = {};
+            newItem.id = item.get(fieldID);
+            newItem.title = item.get(fieldTitle);
+            list.push(newItem);
+        });
+        return list;
+    }
+});
+
+var ChkTable = Backgrid.Grid.extend({
+    model: ChkProductItem,
+    className: 'backgrid table table-striped'
+});
+
+var ChkWorkPage = ChkPage.extend({
+    template: _.template($("#chk-work-tmpl").html()),
+    collection: new ChkProductList(),
+
+    initialize: function () {
+        this.model.on("change:totalAmount", this.onAmountChange, this);
+        this.collection.bind("add", this.recountTotalAmount, this);
+        this.collection.bind("remove", this.recountTotalAmount, this);
+        this.collection.bind("change", this.recountTotalAmount, this);
+        this.collection.bind("reset", this.recountTotalAmount, this);
+    },
+
+    table: undefined,
+    events: {
+        "click #btn-chk-refresh-products": "onBtnRefreshProducts",
+        "click #btn-remove-selected-products": "onBtnRemoveSelectedProducts",
+        "click #btn-chk-add-product": "onBtnAddProduct",
+        "click #btn-chk-sale-pay": "onBtnSalePay",
+        "keyup #input-manual-code": "onAutoCodePress"
+    },
+
+    onAmountChange: function (model, totalAmount) {
+        var attributes = this.model.changedAttributes();
+        if ("totalAmount" in attributes) {
+            var price = model.get("totalAmount").toFixed(2);
+            this.$el.find("#chk-sale-total-amount").text(price);
+            this.$el.find("#chk-sale-input").val(price);
+        }
+    },
+
+    onAutoCodePress: function (e) {
+        e.preventDefault();
+        var input = $(e.target);
+        if (e.keyCode === 13) {
+            this.pushProduct(input);
+        }
+    },
+
+    recountTotalAmount: function () {
+        var total = 0;
+        var self = this;
+        _.each(this.collection.models, function (model) {
+            total += model.get('Price') * model.get('Quantity')
+        });
+        this.model.set('totalAmount', total);
+    },
+
+    onBtnAddProduct: function (e) {
+        var input = this.$el.find('#input-manual-code');
+        this.pushProduct(input);
+    },
+
+    pushProduct: function (input) {
+        var code = $(input).val();
+        $(input).val('');
+        var items = this.model.findProductByCode(code);
+        var attributes = {
+            Code: code,
+            Quantity: '-'
+        };
+        if (!_.isEmpty(items)) {
+            attributes = _.clone(items[0].attributes);
+            attributes.Quantity = 1;
+            this.collection.add(attributes);
+            this.clearMessageBlock();
+        }
+        else {
+            this.onErrorEvent(sprintf(t("The product with code %s was not found"), code));
+        }
+        this.setAutoFocus();
+    },
+
+    onBtnRemoveSelectedProducts: function (e) {
+        this.table.collection.remove(this.table.getSelectedModels());
+        this.setAutoFocus();
+    },
+
+    onBtnRefreshProducts: function (e) {
+        var self = this;
+        $(e.target).button("loading");
+        this.refreshProductList().always(function () {
+            $(e.target).button("reset");
+            self.setAutoFocus();
+        });
+    },
+
+    onBtnSalePay: function (e) {
+        var self = this;
+        var button = $(e.target);
+        $(button).button('loading');
+        var sum = this.$el.find("#chk-sale-input").val();
+        var paymentType = this.$el.find("#chk-sale-payment").val();
+        this.model.sendSale(sum, paymentType, this.table.collection).done(function () {
+            $(button).button('reset');
+            self.setAutoFocus();
+            var changeValue = parseFloat(sum) - parseFloat(self.model.get("totalAmount"));
+            self.onInfoEvent(sprintf(t("Change is: %s"), changeValue.toFixed(2)));
+            self.table.collection.reset();
+        }).fail(function (message) {
+            $(button).button('reset');
+            self.setAutoFocus();
+            self.onErrorEvent(message);
+        });
+    },
+
+    setAutoFocus: function () {
+        this.$el.find('#input-manual-code').focus();
+    },
+
+    initData: function () {
+        var deferred = $.Deferred();
+        var self = this;
+        this.refreshProductList().done(function () {
+            schema.tableFetchIgnoreCache(self.tablePay).done(function () {
+                return deferred.resolve();
+            });
+        }).fail(function () {
+            return deferred.reject();
+        });
+        return deferred.promise();
+    },
+
+    refreshProductList: function () {
+        return schema.tableFetchIgnoreCache('PLU');
+    },
+
+    render: function () {
+        var self = this;
+        this.delegateEvents();
+        this.initData().done(function () {
+            self.$el.html('');
+            self.$el.append(self.template({
+                paymentList: self.collectionToList(schema.tableIgnoreCache(self.tablePay), 'id', 'Name')
+            }));
+            /**
+             * Add table
+             */
+            var columns = [
+                {
+                    name: "",
+                    cell: "select-row",
+                    headerCell: "select-all"
+
+                },
+                {
+                    name: 'Code',
+                    label: t('Code'),
+                    editable: false,
+                    cell: "string"
+                },
+                {
+                    name: 'Name',
+                    label: t('Name'),
+                    editable: false,
+                    cell: "string"
+                },
+                {
+                    name: 'Price',
+                    label: t('Price'),
+                    editable: false,
+                    cell: "number"
+                },
+                {
+                    name: 'Quantity',
+                    label: t('Quantity'),
+                    editable: true,
+                    cell: Backgrid.NumberCell.extend({
+                        decimals: 3
+                    })
+                }
+            ];
+            self.table = new ChkTable({
+                columns: columns,
+                collection: self.collection
+            });
+            self.$el.append(self.table.render().$el);
+            self.setAutoFocus();
+        }).fail(function () {
+            alert('Cannot fetch product list');
+        });
+        return this;
+    }
+});
+
+var ChkIOPage = ChkPage.extend({
+
+    template: _.template($("#chk-io-tmpl").html()),
+    paymentList: [],
+
+    events: {
+        "click #btn-io-input": "onBtnInputClick",
+        "click #btn-io-output": "onBtnOutputClick"
+    },
+
+    onBtnInputClick: function (e) {
+        this.sendPaymentToDevice(true, $(e.target));
+    },
+
+    onBtnOutputClick: function (e) {
+        this.sendPaymentToDevice(false, $(e.target));
+    },
+
+    sendPaymentToDevice: function (isIn, button) {
+        var self = this;
+        $(button).button("loading");
+        var sum = this.$el.find("#chk-io-input").val();
+        var paymentType = this.$el.find("#chk-io-payment").val();
+        this.model.sendPayment(isIn, sum, paymentType).done(function () {
+            $(button).button("reset");
+        }).fail(function (message) {
+            $(button).button("reset");
+            self.onErrorEvent(message);
+        });
+    },
+
+    render: function () {
+        var self = this;
+        this.delegateEvents();
+        this.initData().done(function () {
+            self.$el.html(self.template({
+                paymentList: self.collectionToList(self.paymentList, 'id', 'Name')
+            }));
+        });
+
+        return this;
+    },
+    initData: function () {
+        var deferred = $.Deferred();
+        var tablePay = 'Pay';
+        var self = this;
+
+        /**
+         * Retrieve payment data
+         */
+        schema.tableFetchIgnoreCache(tablePay).done(function () {
+            self.paymentList = schema.tableIgnoreCache(tablePay);
+            return deferred.resolve();
+        }).fail(function () {
+            self.onErrorEvent(t("Cannot fetch payment list"));
+            self.paymentList = [];
+            return deferred.resolve();
+        });
+        return deferred.promise();
+    }
+});
+
 /**
  * Cloud page
  */

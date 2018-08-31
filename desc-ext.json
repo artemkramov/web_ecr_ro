@@ -210,8 +210,20 @@
       "Start date": "Start date",
       "First Z-report number": "First Z-report number",
       "Last Z-report number": "Last Z-report number",
-      "Are you sure you want to perform this operation?": "Are you sure you want to perform this operation?"
-
+      "Are you sure you want to perform this operation?": "Are you sure you want to perform this operation?",
+      "Sale": "Sale",
+      "Input/output": "Input/output",
+      "Input": "Input",
+      "Output": "Output",
+      "Payment type": "Payment type",
+      "Sum": "Sum",
+      "Sum is not correct": "Sum is not correct",
+      "Cashier mode": "Cashier mode",
+      "Add product": "Add product",
+      "Refresh product list": "Refresh product list",
+      "Add product by code": "Add product by code",
+      "The product with code %s was not found": "The product with code %s was not found",
+      "Remove selected items": "Remove selected items"
     }
   }
 }

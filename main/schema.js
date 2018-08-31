@@ -556,7 +556,8 @@ var specialTableSchema = [{
 	fields: [
 		"DIC_POPL", "ID_POKL", "ID_PROVOZ", "DIC_POVER", "DIC_POPL2", "DIC_POVER2", "ID_PROVOZ2", "ID_POKL2", "Enable"
 	]
-}];
+}
+];
 
 var specialTableCollection = [
 	"PLUTableCollection"
